@@ -1,14 +1,17 @@
+from collections.abc import Callable
+
 import torch
 from torch import nn
 
 from models.utils.TrainingParams import TrainingParams
-from models.utils.TrainingUtils import get_train_test_split
+from models.utils.TrainingUtils import get_train_test_split, calculate_accuracy
+
 
 class TrolleyProblemModel:
 
     class ModelSmall(nn.Module):
         def __init__(self, input_features : int):
-            super.__init__()
+            super().__init__()
             self.layer_1 = nn.Linear(in_features=input_features, out_features=10)
             self.layer_2 = nn.Linear(in_features=10, out_features=10)
             self.layer_3 = nn.Linear(in_features=10, out_features=1)
@@ -26,15 +29,34 @@ class TrolleyProblemModel:
 
     def __init__(self,
                  n_input_features: int,
-                 training_params : TrainingParams,
+                 epochs : int,
+                 loss_fn : torch.nn.modules.loss._Loss,
+                 eval_fn : Callable[[torch.Tensor, torch.Tensor], float],
+                 learning_rate : float,
+                 optimizer_class : type[torch.optim.Optimizer],
+                 training_params : TrainingParams = None,
                  model_class : type[nn.Module] = ModelSmall,
                  device : str = "cpu",
                  random_seed : int = 67,
                  verbose : bool = True):
+        assert ((training_params is None and (epochs is not None and loss_fn is not None and eval_fn is not None and learning_rate is not None and optimizer_class is not None))
+                or (training_params is not None))
+
         self.model : nn.Module = model_class(n_input_features)
-        self.training_params : TrainingParams = training_params
-        # init the optimizer inside self.training_params
-        self.training_params.optimizer = self.training_params.optimizer_class(self.model.parameters(), lr=self.training_params.learning_rate)
+        if training_params is not None:
+            self.training_params : TrainingParams = training_params
+            # init the optimizer inside self.training_params
+            self.training_params.optimizer = self.training_params.optimizer_class(self.model.parameters(), lr=self.training_params.learning_rate)
+        elif training_params is None and (epochs is not None and loss_fn is not None and eval_fn is not None and learning_rate is not None and optimizer_class is not None):
+            self.training_params = TrainingParams(epochs=epochs,
+                                                  loss_fn=loss_fn,
+                                                  eval_fn=eval_fn,
+                                                  learning_rate=learning_rate,
+                                                  optimizer_class=optimizer_class)
+            self.training_params.optimizer = self.training_params.optimizer_class(self.model.parameters(),
+                                                                                  lr=self.training_params.learning_rate)
+        else:
+            raise TypeError("TrolleyProblemModel.__init__() did not receive proper training_params.")
         self.device = device
         self.random_seed = random_seed
         self.verbose = verbose

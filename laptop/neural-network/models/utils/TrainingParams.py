@@ -18,3 +18,11 @@ class TrainingParams:
         self.eval_fn : Callable[[torch.Tensor, torch.Tensor], float] = eval_fn
         self.learning_rate : float = learning_rate
         self.optimizer_class : type[torch.optim.Optimizer] = optimizer_class
+
+    def __str__(self):
+        return (f"TrainingParams(\n"
+                f"  epochs: {self.epochs}\n"
+                f"  loss_fn: {self.loss_fn}\n"
+                f"  eval_fn: {self.eval_fn}\n"
+                f"  learning_rate: {self.learning_rate}\n"
+                f"  optimizer_class: {self.optimizer}\n)")
