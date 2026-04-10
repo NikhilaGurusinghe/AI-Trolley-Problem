@@ -7,24 +7,6 @@ from data.InputOutputEnums import Thing, Track
 from models.TrolleyProblemModel import TrolleyProblemModel
 from models.utils.TrainingUtils import calculate_accuracy
 
-# our models aren't big enough to require a gpu
-device = "cpu"
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
-
-
-def initialize_model() -> TrolleyProblemModel:
-    model : TrolleyProblemModel = TrolleyProblemModel(n_input_features=4,
-                                                      epochs=100,
-                                                      loss_fn=nn.BCEWithLogitsLoss(),
-                                                      eval_fn=calculate_accuracy,
-                                                      learning_rate=0.1,
-                                                      optimizer_class=torch.optim.SGD)
-
-    return model
-
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     model: TrolleyProblemModel = TrolleyProblemModel(n_input_features=4,
