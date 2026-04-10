@@ -63,7 +63,7 @@ class TrolleyProblemModel:
         self.verbose = verbose
 
     def inference(self, X : torch.Tensor) -> torch.Tensor:
-        # self.model.eval()
+        self.model.eval()
         with torch.inference_mode():
             # sigmoid turns logits to probabilities of 0 or 1, rounding turns these into 0 or 1 along 0.5 decision boundary
             y_pred = torch.round(torch.sigmoid(self.model(X))).squeeze()

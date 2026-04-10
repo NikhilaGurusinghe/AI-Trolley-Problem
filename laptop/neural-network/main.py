@@ -1,3 +1,5 @@
+import time
+
 import numpy as np
 import pandas as pd
 import torch
@@ -81,12 +83,15 @@ if __name__ == '__main__':
     X = torch.from_numpy(X).type(torch.float)
     y = torch.from_numpy(y).type(torch.float)
 
+    start_time = time.perf_counter()
     model.train(X, y)
 
     # https://discuss.pytorch.org/t/access-all-weights-of-a-model/77672/12
     #print(model.model.parameters())
 
     print(f'trained model inference: {model.inference(testing_data)}')
+    end_time = time.perf_counter()
+    print(f'elapsed time for train and inference was {end_time - start_time:.3f}s')
 
 
 
