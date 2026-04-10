@@ -42,6 +42,7 @@ class TrolleyProblemModel:
         assert ((training_params is None and (epochs is not None and loss_fn is not None and eval_fn is not None and learning_rate is not None and optimizer_class is not None))
                 or (training_params is not None))
 
+        torch.manual_seed(random_seed)
         self.model : nn.Module = model_class(n_input_features)
         if training_params is not None:
             self.training_params : TrainingParams = training_params
@@ -62,7 +63,7 @@ class TrolleyProblemModel:
         self.verbose = verbose
 
     def inference(self, X : torch.Tensor) -> torch.Tensor:
-        self.model.eval()
+        # self.model.eval()
         with torch.inference_mode():
             # sigmoid turns logits to probabilities of 0 or 1, rounding turns these into 0 or 1 along 0.5 decision boundary
             y_pred = torch.round(torch.sigmoid(self.model(X))).squeeze()
@@ -70,8 +71,6 @@ class TrolleyProblemModel:
             return y_pred
 
     def train(self, X : torch.Tensor, y : torch.Tensor) -> None:
-        torch.manual_seed(self.random_seed)
-
         # split training set into train and test set
         X_train, X_test, y_train, y_test = get_train_test_split(X, y, random_seed=self.random_seed)
         # send data to target device
