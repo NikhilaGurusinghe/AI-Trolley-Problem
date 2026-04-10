@@ -28,16 +28,21 @@ def initialize_model() -> TrolleyProblemModel:
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     model: TrolleyProblemModel = TrolleyProblemModel(n_input_features=4,
-                                                     epochs=100,
+                                                     epochs=40,
                                                      loss_fn=nn.BCEWithLogitsLoss(),
                                                      eval_fn=calculate_accuracy,
                                                      learning_rate=0.1,
                                                      optimizer_class=torch.optim.SGD)
 
-    testing_data = np.array([Thing.HUMAN.value, 0.1, Thing.HUMAN.value, 50])
+    testing_data = np.array([[Thing.HUMAN.value, 0.1, Thing.HUMAN.value, 50],
+                             [Thing.HUMAN.value, 1, Thing.HUMAN.value, 99],
+                             [Thing.HUMAN.value, 32, Thing.HUMAN.value, 5.4],
+                             [Thing.HUMAN.value, 3.55, Thing.ALLIGATOR.value, 32],
+                             [Thing.PIG.value, 1, Thing.HUMAN.value, 1],
+                             [Thing.HUMAN.value, 1, Thing.HUMAN.value, 1.1],
+                             [Thing.HUMAN.value, 56, Thing.HUMAN.value, 55],])
     testing_data = torch.from_numpy(testing_data).type(torch.float)
-    print(model.inference(testing_data))
-    print()
+    print(f'untrained model inference: {model.inference(testing_data)}')
 
     training_data = pd.DataFrame({
         "Track_1_Thing": [
@@ -96,6 +101,10 @@ if __name__ == '__main__':
 
     model.train(X, y)
 
-    print(model.inference(testing_data))
+    # https://discuss.pytorch.org/t/access-all-weights-of-a-model/77672/12
+    #print(model.model.parameters())
+
+    print(f'trained model inference: {model.inference(testing_data)}')
+
 
 
