@@ -9,7 +9,6 @@ from data.InputOutputEnums import Thing, Track
 from models.TrolleyProblemModel import TrolleyProblemModel
 from models.utils.TrainingUtils import calculate_accuracy
 
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     model: TrolleyProblemModel = TrolleyProblemModel(n_input_features=4,
                                                      epochs=40,
