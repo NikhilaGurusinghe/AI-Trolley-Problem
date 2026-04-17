@@ -119,7 +119,6 @@ class TrolleyProblemModel:
         Returns:
             torch.Tensor: Predicted labels (0 or 1) shape (n_samples,).
         """
-        ...
         self.model.eval()
         self.model.to(self.device)
         with torch.inference_mode():
