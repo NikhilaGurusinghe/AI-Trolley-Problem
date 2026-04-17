@@ -49,7 +49,7 @@ class TrolleyProblemModel:
                 torch.Tensor: Logits of shape (batch_size, 1).
             """
             # our layers from input to output are
-            # input -> layer_1 -> relu -> layer_2 -> relu -> layer_3 -> logit output
+            # input -> Linear -> relu -> Linear -> relu -> Linear -> logit output
             x = self.layer_1(x)
             x = self.relu(x)
             x = self.layer_2(x)
@@ -69,7 +69,7 @@ class TrolleyProblemModel:
                  device : str = "cpu",
                  random_seed : int = 67,
                  verbose : bool = True):
-        """Create and configure the trolley problem model wrapper.
+        """Create and configure the trolley problem model model.
 
         Args:
             n_input_features (int): Number of input features for the model.
@@ -121,6 +121,7 @@ class TrolleyProblemModel:
         """
         ...
         self.model.eval()
+        self.model.to(self.device)
         with torch.inference_mode():
             # sigmoid turns logits to probabilities of 0 or 1, rounding turns these into 0 or 1 along 0.5 decision boundary
             y_pred = torch.round(torch.sigmoid(self.model(X))).squeeze()
@@ -134,6 +135,11 @@ class TrolleyProblemModel:
             X (torch.Tensor): Features tensor, shape (n_samples, n_features).
             y (torch.Tensor): Target/labels tensor, shape (n_samples,) or (n_samples, 1).
         """
+
+        # do this otherwise no more nice pytorch
+        self.model.to(self.device)
+        X, y = X.to(self.device), y.to(self.device)
+
         # split training set into train and test set
         X_train, X_test, y_train, y_test = get_train_test_split(X, y, random_seed=self.random_seed)
         # send data to target device
