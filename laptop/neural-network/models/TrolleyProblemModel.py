@@ -69,7 +69,7 @@ class TrolleyProblemModel:
                  device : str = "cpu",
                  random_seed : int = 67,
                  verbose : bool = True):
-        """Create and configure the trolley problem model model.
+        """Create and configure the trolley problem model.
 
         Args:
             n_input_features (int): Number of input features for the model.
