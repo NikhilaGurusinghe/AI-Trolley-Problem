@@ -127,6 +127,7 @@ class SpriteRecognitionModel:
             # model(X) gives us a vector of raw logits, argmax gives us the max value in this vector
             # which corresponds to the class that has the highest prediction probability (according to the model)
             y_pred = (self.model(X)).argmax(dim=1)
+            return y_pred
 
     def train(self, data_loader : torch.utils.data.DataLoader) -> None:
         """Train the model using this class's configured `training_params`.
