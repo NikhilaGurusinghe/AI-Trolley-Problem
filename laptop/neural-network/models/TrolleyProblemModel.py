@@ -4,7 +4,8 @@ import torch
 from torch import nn
 
 from models.utils.TrainingParams import TrainingParams
-from models.utils.TrainingUtils import get_train_test_split, calculate_accuracy
+from models.utils.TrainingUtils import get_train_test_split
+
 
 # https://www.learnpytorch.io/02_pytorch_classification/
 class TrolleyProblemModel:

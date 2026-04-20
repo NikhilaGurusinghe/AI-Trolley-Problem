@@ -3,11 +3,8 @@ from typing import Callable
 import torch
 from torch import nn
 
-import torchvision
-from torch._dynamo.variables import optimizer
-from torchvision.transforms import ToTensor
-
 from models.utils.TrainingParams import TrainingParams
+
 
 # https://www.learnpytorch.io/03_pytorch_computer_vision/#7-model-2-building-a-convolutional-neural-network-cnn
 class SpriteRecognitionModel:
