@@ -4,6 +4,7 @@ from collections.abc import Callable
 import numpy as np
 import pandas as pd
 import torch
+from PIL import Image
 from pandas import DataFrame
 from torch.utils.data import Dataset
 from skimage import io, transform
@@ -34,10 +35,11 @@ class SpriteDataset(Dataset):
         image_name = os.path.join(self.root_directory, self.labelled_sprites.iloc[index, 0])
         image = io.imread(image_name)
         classification = self.labelled_sprites.iloc[index, 1:]
-        classification =  np.array([classification], dtype=float).reshape(-1, 2)
+        classification = np.array(self.labelled_sprites.iloc[index, 1:], dtype=float)
+        classification = torch.argmax(torch.from_numpy(classification), dim=0)
         sample = {"image": image, "classification": classification }
 
         if self.transform:
-            sample = self.transform(sample)
+            sample["image"] = self.transform(sample["image"])
 
         return sample

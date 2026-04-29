@@ -4,14 +4,18 @@ import time
 import numpy as np
 import pandas as pd
 import torch
+import torchmetrics
 from torch import nn
 import matplotlib.pyplot as plt
 from skimage import io, transform
-from torchvision import transforms
+from torch.utils.data import DataLoader, sampler, RandomSampler
+from torchvision import transforms, utils
+from torchvision.transforms import InterpolationMode
 
 from data.InputOutputEnums import Entity, Track
 from data.Transforms import *
 from data.sprite.SpriteDataset import SpriteDataset
+from models.SpriteRecognitionModel import SpriteRecognitionModel
 from models.TrolleyProblemModel import TrolleyProblemModel
 from models.utils.TrainingUtils import calculate_accuracy
 
@@ -98,32 +102,56 @@ if __name__ == '__main__':
     # end_time = time.perf_counter()
     # print(f'elapsed time for train and inference was {end_time - start_time:.3f}s')
 
+    image_height: int = 18
+    image_width: int = 10
     sprite_dataset = SpriteDataset("../datasets/sprite/labelled_sprites.csv",
-                                   "../datasets/sprite/")
+                                   "../datasets/sprite/",
+                                   transforms.Compose([
+                                       transforms.ToPILImage(),
+                                       transforms.Pad(5, (255, 255, 255)),
+                                       transforms.RandomCrop((image_height, image_width)),
+                                       transforms.RandomHorizontalFlip(),
+                                       transforms.Grayscale(1),
+                                       # transforms.RandomRotation(6, InterpolationMode.NEAREST_EXACT, fill=(255, 255, 255)),
+                                       # transforms.RandomPerspective(0.15, 0.9),
+                                       transforms.ToTensor()
+                                   ]))
 
-    scale = Rescale(20)
-    crop = RandomCrop(16)
-    composed = transforms.Compose([Rescale(23),
-                                   RandomCrop(16)])
+    sampler = RandomSampler(sprite_dataset, replacement=True, num_samples=100)
+    sprite_dataset_dataloader = DataLoader(sprite_dataset, batch_size=5, num_workers=0, sampler=sampler)
 
-    fig = plt.figure()
-    sample = sprite_dataset[0]
-    print(sample["image"].shape)
-    for i, transform in enumerate([scale, crop, composed]):
-        transformed_sample = transform(sample)
-
-        ax = plt.subplot(1, 3, i + 1)
-        plt.tight_layout()
-        ax.set_title(type(transform).__name__)
-        plt.imshow(transformed_sample["image"])
-
-    plt.show()
-
+    # for i_batch, sample_batched in enumerate(sprite_dataset_dataloader):
+    #     print(i_batch, sample_batched["image"].size(), sample_batched["classification"].size())
     #
-    # for img_name in range(len(img_names)):
-    #     plt.figure()
-    #     plt.imshow(io.imread(os.path.join("../datasets/sprite/", img_names[img_name])))
-    #     plt.show()
+    #     if i_batch == 12:
+    #         plt.figure()
+    #         images_batch, classification_batch = sample_batched["image"], sample_batched["classification"]
+    #         batch_size = len(images_batch)
+    #         image_size = images_batch.size()
+    #
+    #         grid = utils.make_grid(images_batch)
+    #         plt.imshow(grid.numpy().transpose((1, 2, 0)))
+    #         plt.ioff()
+    #         plt.show()
+    #         break
+
+    start_time = time.perf_counter()
+    sprite_recognition_model = SpriteRecognitionModel(image_width=image_width,
+                                                      image_length=image_height,
+                                                      n_colour_channels=1,
+                                                      hidden_units=10,
+                                                      output_shape=2,
+                                                      epochs=50,
+                                                      loss_fn=nn.CrossEntropyLoss(),
+                                                      eval_fn=calculate_accuracy,
+                                                      learning_rate=0.1,
+                                                      optimizer_class=torch.optim.SGD)
+
+    sprite_recognition_model.train(sprite_dataset_dataloader)
 
 
 
+
+
+    end_time = time.perf_counter()
+    print(f'elapsed time for train and inference was {end_time - start_time:.3f}s')

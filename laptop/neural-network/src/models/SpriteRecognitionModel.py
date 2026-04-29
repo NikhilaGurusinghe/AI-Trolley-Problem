@@ -44,7 +44,7 @@ class SpriteRecognitionModel:
                 # the size of our image gets cut in half (per dimension), due to the one max pool in our network
                 # stride=1 convolutional layers (conv2d) does not change the size of our image as it goes through
                 # the network
-                nn.Linear(in_features=n_colour_channels * (int(image_width / 2)) * (int(image_length / 2)),
+                nn.Linear(in_features=hidden_units * (int(image_width / 2)) * (int(image_length / 2)),
                           out_features=output_shape)
             )
 
@@ -164,8 +164,8 @@ class SpriteRecognitionModel:
         # train and test loop
         for epoch in range(self.training_params.epochs):
             ### Training
-            for batch, (X, y) in enumerate(data_loader):
-                X, y = X.to(self.device), y.to(self.device)
+            for batch, sample in enumerate(data_loader):
+                X, y = sample["image"].to(self.device), sample["classification"].to(self.device)
                 self.model.train()
 
                 # Forward pass
@@ -195,8 +195,8 @@ class SpriteRecognitionModel:
             if self.verbose and epoch % 10 == 0:
                 self.model.eval()
                 with torch.inference_mode():
-                    for X, y in data_loader:
-                        X, y = X.to(self.device), y.to(self.device)
+                    for sample in data_loader:
+                        X, y = sample["image"].to(self.device), sample["classification"].to(self.device)
                         # Forward pass
                         test_pred = self.model(X)
 

@@ -10,6 +10,10 @@ def get_train_test_split(X: torch.Tensor,
 
 def calculate_accuracy(y_true: torch.Tensor, y_pred: torch.Tensor) -> float:
     assert len(y_true) == len(y_pred)
+    # print("y_true", y_true.shape)
+    # print("y_true", y_true)
+    # print("y_pred", y_pred.shape)
+    # print("y_pred", y_pred)
 
     correct = torch.eq(y_true, y_pred).sum().item()
     accuracy = (correct / len(y_true)) * 100
