@@ -9,18 +9,19 @@ from models.utils.TrainingUtils import get_train_test_split
 
 # https://www.learnpytorch.io/02_pytorch_classification/
 class TrolleyProblemModel:
-    """Wrapper for building, training and running inference on an artificial neural network.
+    """Wrapper for building, training and running inference on an artificial neural network. This "backbone" can be
+    used to decide between simple binary decisions e.g. Track 1 or Track 2 based on training data.
 
     The wrapper holds:
     - `model`: an `nn.Module` instance (defaults to `ModelSmall`)
-    - `training_params`: a `TrainingParams` instance that contains loss, optimizer, epochs, etc.
+    - `training_params`: a `TrainingParams` instance that contains training parameters loss, optimizer, epochs, etc.
 
     Attributes:
         model (nn.Module): Instantiated neural network.
         training_params (TrainingParams): Parameters controlling training.
         device (str): Device name.
         random_seed (int): Seed used for deterministic behavior where possible.
-        verbose (bool): Verbosity flag.
+        verbose (bool): Verbosity flag (i.e. whether to print stuff to console).
     """
     class ModelSmall(nn.Module):
         """A small artificial neural network. This is used as the default model. The architecture of the model is:

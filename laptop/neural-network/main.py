@@ -5,7 +5,7 @@ import pandas as pd
 import torch
 from torch import nn
 
-from data.InputOutputEnums import Thing, Track
+from classification.InputOutputEnums import Entity, Track
 from models.TrolleyProblemModel import TrolleyProblemModel
 from models.utils.TrainingUtils import calculate_accuracy
 
@@ -17,23 +17,23 @@ if __name__ == '__main__':
                                                      learning_rate=0.1,
                                                      optimizer_class=torch.optim.SGD)
 
-    testing_data = np.array([[Thing.HUMAN.value, 0.1, Thing.HUMAN.value, 50],
-                             [Thing.HUMAN.value, 1, Thing.HUMAN.value, 99],
-                             [Thing.HUMAN.value, 32, Thing.HUMAN.value, 5.4],
-                             [Thing.HUMAN.value, 3.55, Thing.ALLIGATOR.value, 32],
-                             [Thing.PIG.value, 1, Thing.HUMAN.value, 1],
-                             [Thing.HUMAN.value, 1, Thing.HUMAN.value, 1.1],
-                             [Thing.HUMAN.value, 56, Thing.HUMAN.value, 55],])
+    testing_data = np.array([[Entity.HUMAN.value, 0.1, Entity.HUMAN.value, 50],
+                             [Entity.HUMAN.value, 1, Entity.HUMAN.value, 99],
+                             [Entity.HUMAN.value, 32, Entity.HUMAN.value, 5.4],
+                             [Entity.HUMAN.value, 3.55, Entity.ALLIGATOR.value, 32],
+                             [Entity.PIG.value, 1, Entity.HUMAN.value, 1],
+                             [Entity.HUMAN.value, 1, Entity.HUMAN.value, 1.1],
+                             [Entity.HUMAN.value, 56, Entity.HUMAN.value, 55], ])
     testing_data = torch.from_numpy(testing_data).type(torch.float)
     print(f'untrained model inference: {model.inference(testing_data)}')
 
     training_data = pd.DataFrame({
         "Track_1_Thing": [
-            Thing.HUMAN, Thing.HUMAN, Thing.HUMAN, Thing.HUMAN, Thing.HUMAN, Thing.HUMAN,
-            Thing.NOTHING, Thing.ALLIGATOR, Thing.COW, Thing.FROG, Thing.KOALA, Thing.PIG,
-            Thing.NOTHING, Thing.ALLIGATOR, Thing.COW, Thing.FROG, Thing.KOALA, Thing.PIG,
-            Thing.HUMAN, Thing.HUMAN, Thing.HUMAN, Thing.HUMAN,
-            Thing.NOTHING, Thing.COW, Thing.PIG, Thing.ALLIGATOR,
+            Entity.HUMAN, Entity.HUMAN, Entity.HUMAN, Entity.HUMAN, Entity.HUMAN, Entity.HUMAN,
+            Entity.NOTHING, Entity.ALLIGATOR, Entity.COW, Entity.FROG, Entity.KOALA, Entity.PIG,
+            Entity.NOTHING, Entity.ALLIGATOR, Entity.COW, Entity.FROG, Entity.KOALA, Entity.PIG,
+            Entity.HUMAN, Entity.HUMAN, Entity.HUMAN, Entity.HUMAN,
+            Entity.NOTHING, Entity.COW, Entity.PIG, Entity.ALLIGATOR,
         ],
         "Track_1_Age": [
             5, 8, 13, 18, 25, 40,
@@ -43,11 +43,11 @@ if __name__ == '__main__':
             4, 10, 2, 50,
         ],
         "Track_2_Thing": [
-            Thing.HUMAN, Thing.HUMAN, Thing.HUMAN, Thing.HUMAN, Thing.HUMAN, Thing.HUMAN,
-            Thing.HUMAN, Thing.HUMAN, Thing.HUMAN, Thing.HUMAN, Thing.HUMAN, Thing.HUMAN,
-            Thing.HUMAN, Thing.HUMAN, Thing.HUMAN, Thing.HUMAN, Thing.HUMAN, Thing.HUMAN,
-            Thing.NOTHING, Thing.ALLIGATOR, Thing.COW, Thing.PIG,
-            Thing.COW, Thing.PIG, Thing.ALLIGATOR, Thing.FROG,
+            Entity.HUMAN, Entity.HUMAN, Entity.HUMAN, Entity.HUMAN, Entity.HUMAN, Entity.HUMAN,
+            Entity.HUMAN, Entity.HUMAN, Entity.HUMAN, Entity.HUMAN, Entity.HUMAN, Entity.HUMAN,
+            Entity.HUMAN, Entity.HUMAN, Entity.HUMAN, Entity.HUMAN, Entity.HUMAN, Entity.HUMAN,
+            Entity.NOTHING, Entity.ALLIGATOR, Entity.COW, Entity.PIG,
+            Entity.COW, Entity.PIG, Entity.ALLIGATOR, Entity.FROG,
         ],
         "Track_2_Age": [
             13, 5, 40, 8, 80, 25,

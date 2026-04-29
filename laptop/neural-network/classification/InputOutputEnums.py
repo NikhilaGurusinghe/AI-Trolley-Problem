@@ -1,6 +1,6 @@
 from enum import Enum
 
-class Thing(Enum):
+class Entity(Enum):
     NOTHING = 0
     HUMAN = 1
     ALLIGATOR = 2

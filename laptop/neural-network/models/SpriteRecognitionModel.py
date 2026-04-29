@@ -8,8 +8,23 @@ from models.utils.TrainingParams import TrainingParams
 
 # https://www.learnpytorch.io/03_pytorch_computer_vision/#7-model-2-building-a-convolutional-neural-network-cnn
 class SpriteRecognitionModel:
+    """Wrapper for building, training and running inference on a convolutional artificial neural network. This
+     "backbone" can be used to classify simple pixel-art images into categories e.g. cat, dog, adult, child, etc.
+
+       The wrapper holds:
+       - `model`: an `nn.Module` instance (defaults to `ModelSmall`)
+       - `training_params`: a `TrainingParams` instance that contains training parameters loss, optimizer, epochs, etc.
+
+       Attributes:
+           model (nn.Module): Instantiated convolutional neural network.
+           training_params (TrainingParams): Parameters controlling training.
+           device (str): Device name.
+           random_seed (int): Seed used for deterministic behavior where possible.
+           verbose (bool): Verbosity flag (i.e. whether to print stuff to console).
+       """
     class ModelSmall(nn.Module):
         # model architecture based on https://poloclub.github.io/cnn-explainer/
+        # but smoller
         def __init__(self, image_width : int, image_length : int, n_colour_channels : int,
                      hidden_units : int, output_shape : int):
             super().__init__()
@@ -34,7 +49,8 @@ class SpriteRecognitionModel:
             )
 
         def forward(self, x: torch.Tensor) -> torch.Tensor:
-            """Calculates a forward pass through the convolutional neural network (such as that done during inference time).
+            """Calculates a forward pass through the convolutional neural network (such as that done during inference
+            time).
 
             Args:
                 x (torch.Tensor): Input tensor of shape (batch_size, input_features).
@@ -69,10 +85,13 @@ class SpriteRecognitionModel:
             hidden_units (int): Number of neurons per hidden layer.
             output_shape (int): Number of classes that you're classifying images into.
             epochs (int): Number of training epochs (ignored if `training_params` supplied).
-            loss_fn (torch.nn.modules.loss._Loss): Loss function used for training. (ignored if `training_params` supplied).
-            eval_fn (Callable[[torch.Tensor, torch.Tensor], float]): Evaluation function: (y_true, y_pred) -> metric. (ignored if `training_params` supplied).
+            loss_fn (torch.nn.modules.loss._Loss): Loss function used for training. (ignored if `training_params`
+                supplied).
+            eval_fn (Callable[[torch.Tensor, torch.Tensor], float]): Evaluation function: (y_true, y_pred) -> metric.
+                (ignored if `training_params` supplied).
             learning_rate (float): Learning rate for the optimizer. (ignored if `training_params` supplied).
-            optimizer_class (type[torch.optim.Optimizer]): Optimizer class (e.g., `torch.optim.SGD`). (ignored if `training_params` supplied).
+            optimizer_class (type[torch.optim.Optimizer]): Optimizer class (e.g., `torch.optim.SGD`).
+                (ignored if `training_params` supplied).
             training_params (TrainingParams | None): Optionally supply a prebuilt `TrainingParams`.
             model_class (type[nn.Module]): Model class to instantiate (default: `ModelSmall`).
             device (str): Device to run on, e.g. "cpu" or "cuda" (default: `cpu`).
@@ -82,20 +101,25 @@ class SpriteRecognitionModel:
         Raises:
             TypeError: If arguments are inconsistent (neither full args nor training_params given).
         """
-        assert ((training_params is None and (epochs is not None and loss_fn is not None and eval_fn is not None and learning_rate is not None and optimizer_class is not None))
-                or (training_params is not None))
+        assert ((training_params is None and
+                 (epochs is not None and loss_fn is not None and eval_fn is not None and
+                  learning_rate is not None and optimizer_class is not None)) or (training_params is not None))
 
-        assert image_width is not None and image_length is not None and n_colour_channels is not None and hidden_units is not None and output_shape is not None
+        assert (image_width is not None and image_length is not None and n_colour_channels is not None and
+                hidden_units is not None and output_shape is not None)
 
         torch.manual_seed(random_seed)
-        self.model : nn.Module = model_class(image_width, image_length, n_colour_channels, hidden_units, output_shape)
+        self.model : nn.Module = model_class(image_width,
+                                             image_length,
+                                             n_colour_channels,
+                                             hidden_units, output_shape)
         if training_params is not None:
             self.training_params: TrainingParams = training_params
             # init the optimizer inside self.training_params
             self.training_params.optimizer = self.training_params.optimizer_class(self.model.parameters(),
                                                                                   lr=self.training_params.learning_rate)
-        elif training_params is None and (
-                epochs is not None and loss_fn is not None and eval_fn is not None and learning_rate is not None and optimizer_class is not None):
+        elif training_params is None and (epochs is not None and loss_fn is not None and eval_fn is not None and
+                                          learning_rate is not None and optimizer_class is not None):
             self.training_params = TrainingParams(epochs=epochs,
                                                   loss_fn=loss_fn,
                                                   eval_fn=eval_fn,
@@ -183,4 +207,5 @@ class SpriteRecognitionModel:
                     test_loss /= len(data_loader)
                     test_eval /= len(data_loader)
 
-                print(f"Epoch: {epoch} | Train loss: {train_loss:.5f}, Train accuracy: {train_eval:.2f}% | Test loss: {test_loss:.5f}, Test acc: {test_eval:.2f}%")
+                print(f"Epoch: {epoch} | Train loss: {train_loss:.5f},"
+                      f" Train accuracy: {train_eval:.2f}% | Test loss: {test_loss:.5f}, Test acc: {test_eval:.2f}%")
