@@ -3,8 +3,8 @@ from collections.abc import Callable
 import torch
 from torch import nn
 
-from models.utils.TrainingParams import TrainingParams
-from models.utils.TrainingUtils import get_train_test_split
+from src.models.utils.TrainingParams import TrainingParams
+from src.models.utils.TrainingUtils import get_train_test_split
 
 
 # https://www.learnpytorch.io/02_pytorch_classification/
@@ -30,7 +30,7 @@ class TrolleyProblemModel:
         Args:
             input_features (int): Number of features in the input tensor.
         """
-        def __init__(self, input_features : int):
+        def __init__(self, input_features: int):
             """
             Args:
                 input_features (int): The number of inputs passed into the network
@@ -42,7 +42,8 @@ class TrolleyProblemModel:
             self.relu = nn.ReLU()
 
         def forward(self, x: torch.Tensor) -> torch.Tensor:
-            """Calculates a forward pass through the artificial neural network (such as that done during inference time).
+            """Calculates a forward pass through the artificial neural network
+            (such as that done during inference time).
 
             Args:
                 x (torch.Tensor): Input tensor of shape (batch_size, input_features).
@@ -61,25 +62,28 @@ class TrolleyProblemModel:
 
     def __init__(self,
                  n_input_features: int,
-                 epochs : int,
-                 loss_fn : torch.nn.modules.loss._Loss,
-                 eval_fn : Callable[[torch.Tensor, torch.Tensor], float],
-                 learning_rate : float,
-                 optimizer_class : type[torch.optim.Optimizer],
-                 training_params : TrainingParams = None,
-                 model_class : type[nn.Module] = ModelSmall,
-                 device : str = "cpu",
-                 random_seed : int = 67,
-                 verbose : bool = True):
+                 epochs: int,
+                 loss_fn: torch.nn.modules.loss._Loss,
+                 eval_fn: Callable[[torch.Tensor, torch.Tensor], float],
+                 learning_rate: float,
+                 optimizer_class: type[torch.optim.Optimizer],
+                 training_params: TrainingParams = None,
+                 model_class: type[nn.Module] = ModelSmall,
+                 device: str = "cpu",
+                 random_seed: int = 67,
+                 verbose: bool = True):
         """Create and configure the trolley problem model.
 
         Args:
             n_input_features (int): Number of input features for the model.
             epochs (int): Number of training epochs (ignored if `training_params` supplied).
-            loss_fn (torch.nn.modules.loss._Loss): Loss function used for training. (ignored if `training_params` supplied).
-            eval_fn (Callable[[torch.Tensor, torch.Tensor], float]): Evaluation function: (y_true, y_pred) -> metric. (ignored if `training_params` supplied).
+            loss_fn (torch.nn.modules.loss._Loss): Loss function used for training.
+                (ignored if `training_params` supplied).
+            eval_fn (Callable[[torch.Tensor, torch.Tensor], float]): Evaluation function: (y_true, y_pred) -> metric.
+                (ignored if `training_params` supplied).
             learning_rate (float): Learning rate for the optimizer. (ignored if `training_params` supplied).
-            optimizer_class (type[torch.optim.Optimizer]): Optimizer class (e.g., `torch.optim.SGD`). (ignored if `training_params` supplied).
+            optimizer_class (type[torch.optim.Optimizer]): Optimizer class (e.g., `torch.optim.SGD`).
+                (ignored if `training_params` supplied).
             training_params (TrainingParams | None): Optionally supply a prebuilt `TrainingParams`.
             model_class (type[nn.Module]): Model class to instantiate (default: `ModelSmall`).
             device (str): Device to run on, e.g. "cpu" or "cuda" (default: `cpu`).
@@ -89,16 +93,21 @@ class TrolleyProblemModel:
         Raises:
             TypeError: If arguments are inconsistent (neither full args nor training_params given).
         """
-        assert ((training_params is None and (epochs is not None and loss_fn is not None and eval_fn is not None and learning_rate is not None and optimizer_class is not None))
-                or (training_params is not None))
+        assert ((training_params is None and (epochs is not None and loss_fn is not None and eval_fn is not None and
+                                              learning_rate is not None and optimizer_class is not None)) or
+                (training_params is not None))
 
         torch.manual_seed(random_seed)
-        self.model : nn.Module = model_class(n_input_features)
+        self.model: nn.Module = model_class(n_input_features)
         if training_params is not None:
             self.training_params : TrainingParams = training_params
             # init the optimizer inside self.training_params
-            self.training_params.optimizer = self.training_params.optimizer_class(self.model.parameters(), lr=self.training_params.learning_rate)
-        elif training_params is None and (epochs is not None and loss_fn is not None and eval_fn is not None and learning_rate is not None and optimizer_class is not None):
+            self.training_params.optimizer = self.training_params.optimizer_class(
+                self.model.parameters(),
+                lr=self.training_params.learning_rate
+            )
+        elif training_params is None and (epochs is not None and loss_fn is not None and eval_fn is not None and
+                                          learning_rate is not None and optimizer_class is not None):
             self.training_params = TrainingParams(epochs=epochs,
                                                   loss_fn=loss_fn,
                                                   eval_fn=eval_fn,
@@ -112,7 +121,7 @@ class TrolleyProblemModel:
         self.random_seed = random_seed
         self.verbose = verbose
 
-    def inference(self, X : torch.Tensor) -> torch.Tensor:
+    def inference(self, X: torch.Tensor) -> torch.Tensor:
         """Have the model inference/make predictions based on an input Tensor of all your data.
 
         Args:
@@ -124,12 +133,13 @@ class TrolleyProblemModel:
         self.model.eval()
         self.model.to(self.device)
         with torch.inference_mode():
-            # sigmoid turns logits to probabilities of 0 or 1, rounding turns these into 0 or 1 along 0.5 decision boundary
+            # sigmoid turns logits to probabilities of 0 or 1, rounding turns these into 0 or 1 along 0.5 decision
+            # boundary
             y_pred = torch.round(torch.sigmoid(self.model(X))).squeeze()
 
             return y_pred
 
-    def train(self, X : torch.Tensor, y : torch.Tensor) -> None:
+    def train(self, X: torch.Tensor, y: torch.Tensor) -> None:
         """Train the model using this class's configured `training_params`.
 
         Args:
@@ -155,7 +165,8 @@ class TrolleyProblemModel:
             # Forward pass
             # squeeze to remove extra dimensions, this won't work unless model and data are on same device
             y_logits = self.model(X_train).squeeze()
-            # sigmoid turns logits to probabilities of 0 or 1, rounding turns these into 0 or 1 along 0.5 decision boundary
+            # sigmoid turns logits to probabilities of 0 or 1, rounding turns these into 0 or 1 along 0.5 decision
+            # boundary
             y_pred = torch.round(torch.sigmoid(y_logits))
 
             # Train loss + train_eval calculation
@@ -186,4 +197,5 @@ class TrolleyProblemModel:
                     test_loss = self.training_params.loss_fn(test_logits, y_test)
                     test_eval = self.training_params.eval_fn(y_test, test_pred)
 
-                print(f"Epoch: {epoch} | Train loss: {train_loss:.5f}, Train accuracy: {train_eval:.2f}% | Test loss: {test_loss:.5f}, Test acc: {test_eval:.2f}%")
+                print(f"Epoch: {epoch} | Train loss: {train_loss:.5f}, "
+                      f"Train accuracy: {train_eval:.2f}% | Test loss: {test_loss:.5f}, Test acc: {test_eval:.2f}%")

@@ -3,7 +3,7 @@ from typing import Callable
 import torch
 from torch import nn
 
-from models.utils.TrainingParams import TrainingParams
+from src.models.utils.TrainingParams import TrainingParams
 
 
 # https://www.learnpytorch.io/03_pytorch_computer_vision/#7-model-2-building-a-convolutional-neural-network-cnn
@@ -25,8 +25,8 @@ class SpriteRecognitionModel:
     class ModelSmall(nn.Module):
         # model architecture based on https://poloclub.github.io/cnn-explainer/
         # but smoller
-        def __init__(self, image_width : int, image_length : int, n_colour_channels : int,
-                     hidden_units : int, output_shape : int):
+        def __init__(self, image_width: int, image_length: int, n_colour_channels: int,
+                     hidden_units: int, output_shape: int):
             super().__init__()
             self.block_1 = nn.Sequential(
                 nn.Conv2d(in_channels=n_colour_channels,
@@ -109,7 +109,7 @@ class SpriteRecognitionModel:
                 hidden_units is not None and output_shape is not None)
 
         torch.manual_seed(random_seed)
-        self.model : nn.Module = model_class(image_width,
+        self.model: nn.Module = model_class(image_width,
                                              image_length,
                                              n_colour_channels,
                                              hidden_units, output_shape)
@@ -150,7 +150,7 @@ class SpriteRecognitionModel:
             y_pred = (self.model(X)).argmax(dim=1)
             return y_pred
 
-    def train(self, data_loader : torch.utils.data.DataLoader) -> None:
+    def train(self, data_loader: torch.utils.data.DataLoader) -> None:
         """Train the model using this class's configured `training_params`.
 
            Args:

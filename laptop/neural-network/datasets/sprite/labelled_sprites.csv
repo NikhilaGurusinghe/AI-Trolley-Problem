@@ -1,0 +1,9 @@
+image_name,x_adult,x_child
+training_images_adult_1.png, 1, 0
+training_images_adult_2.png, 1, 0
+training_images_adult_3.png, 1, 0
+training_images_adult_4.png, 1, 0
+training_images_small child_1.png, 0, 1
+training_images_small child_2.png, 0, 1
+training_images_small child_3.png, 0, 1
+training_images_small child_4.png, 0, 1
