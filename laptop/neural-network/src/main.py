@@ -19,6 +19,12 @@ from models.SpriteRecognitionModel import SpriteRecognitionModel
 from models.TrolleyProblemModel import TrolleyProblemModel
 from models.utils.TrainingUtils import calculate_accuracy
 
+activation = {}
+def get_activation(name):
+    def hook(model, input, output):
+        activation[name] = output.detach()
+    return hook
+
 if __name__ == '__main__':
     # model: TrolleyProblemModel = TrolleyProblemModel(n_input_features=4,
     #                                                  epochs=40,
@@ -136,7 +142,7 @@ if __name__ == '__main__':
     #         break
 
     start_time = time.perf_counter()
-    sprite_recognition_model = SpriteRecognitionModel(image_width=image_width,
+    sprite_recognition_model: SpriteRecognitionModel = SpriteRecognitionModel(image_width=image_width,
                                                       image_length=image_height,
                                                       n_colour_channels=1,
                                                       hidden_units=10,
@@ -149,8 +155,20 @@ if __name__ == '__main__':
 
     sprite_recognition_model.train(sprite_dataset_dataloader)
 
-
-
+    # https://discuss.pytorch.org/t/visualize-feature-map/29597/2
+    # sprite_recognition_model.model.block_1.register_forward_hook(get_activation('block_1'))
+    # data = next(iter(sprite_dataset_dataloader))["image"]
+    # print(data.shape)
+    # # data = torch.squeeze(data)
+    # # print(data.shape)
+    # output = sprite_recognition_model.inference(data)
+    #
+    # act = activation["block_1"]
+    # fig, axarr = plt.subplots(act.size(0))
+    # for idx in range(act.size(0)):
+    #     axarr[idx].imshow(act[idx])
+    #
+    # plt.show()
 
 
     end_time = time.perf_counter()
