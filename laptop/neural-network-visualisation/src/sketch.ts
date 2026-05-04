@@ -1,13 +1,16 @@
 import p5 from "p5";
+import Client from "./websocket/client.ts";
+
+const WEBSOCKET_PORT_NUMBER: number = 8001;
+const WEBSOCKET_HOST_NAME: string = "localhost";
 
 const sketch = (p5: p5): void => {
-	const websocketPort = 8001;
+	let websocket: Client;
 
 	p5.setup = () => {
 		p5.createCanvas(p5.windowWidth, p5.windowHeight);
-		// const websocket: WebSocket = new WebSocket(`ws://localhost:${websocketPort}`);
-		// websocket.onopen = () =>  websocket.send(JSON.stringify("hello"));
-		// console.log("sent to websocket");
+
+		websocket = new Client(WEBSOCKET_HOST_NAME, WEBSOCKET_PORT_NUMBER);
 
 	};
 
