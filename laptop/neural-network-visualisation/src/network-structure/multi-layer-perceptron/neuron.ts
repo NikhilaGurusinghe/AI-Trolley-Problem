@@ -1,5 +1,4 @@
-﻿import p5 from "p5";
-import * as assert from "node:assert";
+﻿import * as assert from "node:assert";
 
 export default class Neuron {
     private weights: number[];

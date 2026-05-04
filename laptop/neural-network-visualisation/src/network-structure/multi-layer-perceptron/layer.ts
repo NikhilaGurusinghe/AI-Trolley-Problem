@@ -1,5 +1,4 @@
 ﻿import Neuron from "./neuron.ts"
-import * as assert from "node:assert";
 
 export default class Layer {
     private readonly neurons: Neuron[];
