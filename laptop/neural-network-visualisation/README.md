@@ -23,7 +23,7 @@ bun run watch
 
 Open `index.html` with a Web server (Right click `index.html` -> "Open with Live Server" for VS Code).
 
-The entry point is `src/index.ts`.
+The entry point is `src/sketch.ts`.
 
 # Building
 

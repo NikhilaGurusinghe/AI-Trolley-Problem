@@ -1,10 +1,10 @@
 {
   "name": "p5",
-  "module": "src/index.ts",
+  "module": "src/sketch.ts",
   "type": "module",
   "scripts": {
-    "watch": "bun build src/index.ts --outdir ./dist --target browser --watch",
-    "build": "bun build src/index.ts --outdir ./dist --target browser --minify",
+    "watch": "bun build src/sketch.ts --outdir ./dist --target browser --watch",
+    "build": "bun build src/sketch.ts --outdir ./dist --target browser --minify",
     "lint": "bunx @biomejs/biome lint src",
     "format": "bunx @biomejs/biome format src --write"
   },
