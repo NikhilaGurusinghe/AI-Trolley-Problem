@@ -7,11 +7,10 @@ const WEBSOCKET_HOST_NAME: string = "localhost";
 const sketch = (p5: p5): void => {
 	let websocket: Client;
 
-	p5.setup = () => {
+	p5.setup = async () => {
 		p5.createCanvas(p5.windowWidth, p5.windowHeight);
 
 		websocket = new Client(WEBSOCKET_HOST_NAME, WEBSOCKET_PORT_NUMBER);
-
 	};
 
 	p5.draw = () => {
