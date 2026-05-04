@@ -3,8 +3,8 @@
   "module": "src/sketch.ts",
   "type": "module",
   "scripts": {
-    "watch": "bun build src/sketch.ts --outdir ./dist --target browser --watch",
-    "build": "bun build src/sketch.ts --outdir ./dist --target browser --minify",
+    "watch": "bun build src/sketch.ts --outdir ./dist --target browser --watch --banner '// Made with <3 by humans'",
+    "build": "bun build src/sketch.ts --outdir ./dist --target browser --minify --splitting --banner '// Made with <3 by humans'",
     "lint": "bunx @biomejs/biome lint src",
     "format": "bunx @biomejs/biome format src --write"
   },
