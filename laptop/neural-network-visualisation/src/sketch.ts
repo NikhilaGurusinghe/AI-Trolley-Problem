@@ -11,6 +11,7 @@ const sketch = (p5: p5): void => {
 		p5.createCanvas(p5.windowWidth, p5.windowHeight);
 
 		websocket = new Client(WEBSOCKET_HOST_NAME, WEBSOCKET_PORT_NUMBER);
+        console.log(await websocket.send("debug", ["hello", "world"]));
 	};
 
 	p5.draw = () => {

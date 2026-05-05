@@ -1,6 +1,3 @@
-
-import {randomBytes} from "node:crypto";
-
 type FulfillRequestCallback = (error: any, responsePayload: any) => void
 
 // https://worlds-slowest.dev/posts/rpc-using-websockets/
@@ -18,7 +15,10 @@ export default class Client {
         this.socket.addEventListener("message", this.receive.bind(this));
 
         this.isSocketOpen =  new Promise((resolve, reject) => {
-            this.socket.addEventListener("open", () => resolve, { once: true });
+            this.socket.addEventListener("open", () => {
+                resolve()
+                console.log(`client.ts: connected to websocket at ws://${hostName}:${portNumber}!`)
+            }, { once: true });
             this.socket.addEventListener("error",
               () => reject(new Error("client.ts: websocket failed to open")), { once: true });
         });
@@ -28,13 +28,13 @@ export default class Client {
         await this.isSocketOpen;
 
         // https://stackoverflow.com/questions/9407892/how-to-generate-random-sha1-hash-to-use-as-id-in-node-js
-        const requestID: String = randomBytes(20).toString("hex");
+        const requestID: String = crypto.randomUUID();
 
         return new Promise((resolve, reject) => {
 
             this.promisedRequests.set(requestID, (error: any, responsePayload: any) : void => {
                 // #TODO if undefined is strict enough here
-                if (error === undefined || error === null) {
+                if (error !== undefined) {
                     reject(new Error("client.ts: server failed to process request"))
                 } else {
                     resolve(responsePayload);
@@ -42,7 +42,9 @@ export default class Client {
             });
 
             this.socket.send(JSON.stringify(
-                (requestArguments === undefined) ? {requestID, requestType} : {requestID, requestType, requestArguments}
+                (requestArguments === undefined) ?
+                  {id: requestID, type: requestType} :
+                  {id: requestID, type: requestType, arguments: requestArguments}
             ));
         })
     }
