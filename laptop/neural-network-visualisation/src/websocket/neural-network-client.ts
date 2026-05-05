@@ -1,8 +1,12 @@
 import Client from "./client.ts";
 
-export default class NeuralNetworkClient extends Client {
-    async getNetworkStructure(network: any) {
-        return this.send("get", [...arguments]);
-    }
+export enum NetworkType {
+    TROLLEY_PROBLEM_MODEL,
+    SPRITE_RECOGNITION_MODEL
+}
 
+export class NeuralNetworkClient extends Client {
+    public async getNetworkStructure(network: NetworkType) {
+        return this.send("getNetworkStructure", [...arguments]);
+    }
 }

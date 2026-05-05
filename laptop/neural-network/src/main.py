@@ -21,6 +21,8 @@ from models.TrolleyProblemModel import TrolleyProblemModel
 from models.utils.TrainingUtils import calculate_accuracy
 from websocket.server import Server
 
+# TTS library https://github.com/nateshmbhat/pyttsx3
+
 activation = {}
 def get_activation(name):
     def hook(model, input, output):

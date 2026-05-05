@@ -24,7 +24,7 @@ export default class Client {
         });
     }
 
-    public async send(requestType: String, requestArguments?: any[]): Promise<void> {
+    protected async send(requestType: String, requestArguments?: any[]): Promise<void> {
         await this.isSocketOpen;
 
         // https://stackoverflow.com/questions/9407892/how-to-generate-random-sha1-hash-to-use-as-id-in-node-js
@@ -49,7 +49,7 @@ export default class Client {
         })
     }
 
-    public receive(event: MessageEvent) : void {
+    private receive(event: MessageEvent) : void {
        let response = JSON.parse(event.data);
        let fulfillRequestCallback: FulfillRequestCallback | undefined = this.promisedRequests.get(response.id);
        if (fulfillRequestCallback == undefined) return;

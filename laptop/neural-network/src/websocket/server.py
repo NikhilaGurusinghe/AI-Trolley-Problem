@@ -16,16 +16,12 @@ class Server:
             print(message)
             # TODO get responseID from message and send this back with response
             message_json = json.loads(message)
-            print(message_json)
-            print(message_json["id"])
-            print(message_json["type"])
-            print()
-
+         
             # TODO do stuff here
 
             response = {
                 "id": message_json["id"],
-                "payload": "hello I am a payload",
+                "payload": message_json["type"],
             }
             await websocket.send(json.dumps(response))
 
