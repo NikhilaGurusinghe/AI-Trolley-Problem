@@ -1,8 +1,4 @@
 
-// TODO how to ensure that sends are only sent when the socket has connected?
-//  perhaps block until it has connected as we are only connecting once?
-// TODO should we block until we receive a message?
-
 import {randomBytes} from "node:crypto";
 
 type FulfillRequestCallback = (error: any, responsePayload: any) => void
@@ -18,7 +14,7 @@ export default class Client {
         this.promisedRequests = new Map<String, FulfillRequestCallback>()
 
         this.socket = new WebSocket(`ws://${hostName}:${portNumber}`);
-        // receive fires whenever socket receives a message
+        // receive() fires whenever socket receives a message
         this.socket.addEventListener("message", this.receive.bind(this));
 
         this.isSocketOpen =  new Promise((resolve, reject) => {
