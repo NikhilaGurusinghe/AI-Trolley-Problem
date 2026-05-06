@@ -1,6 +1,7 @@
 import p5 from "p5";
 import Client from "./websocket/client.ts";
-import {NeuralNetworkClient, NetworkType} from "./websocket/neural-network-client.ts";
+import {NeuralNetworkClient} from "./websocket/neural-network-client.ts";
+import {NetworkType} from "./network-structure/network-type.ts";
 
 const WEBSOCKET_PORT_NUMBER: number = 8001;
 const WEBSOCKET_HOST_NAME: string = "localhost";
@@ -12,7 +13,8 @@ const sketch = (p5: p5): void => {
 		p5.createCanvas(p5.windowWidth, p5.windowHeight);
 
 		websocket = new NeuralNetworkClient(WEBSOCKET_HOST_NAME, WEBSOCKET_PORT_NUMBER);
-        console.log(await websocket.getNetworkStructure(NetworkType.TROLLEY_PROBLEM_MODEL));
+        console.log(await websocket.getNetworkStructure(NetworkType.SPRITE_RECOGNITION_MODEL).catch((reason: any) => console.log(reason)));
+        console.log(await websocket.getNetworkStructure(NetworkType.TROLLEY_PROBLEM_MODEL).catch((reason: any) => console.log(reason)));
 	};
 
 	p5.draw = () => {

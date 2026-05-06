@@ -1,4 +1,4 @@
-﻿import Neuron from "./neuron.ts"
+﻿import type Neuron from "./neuron.ts"
 
 export default class Layer {
     private readonly neurons: Neuron[];

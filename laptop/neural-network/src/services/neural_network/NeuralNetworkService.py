@@ -32,7 +32,8 @@ class NeuralNetworkService:
                                                                                         learning_rate=0.1,
                                                                                         optimizer_class=torch.optim.SGD)
         else:
-            raise Exception("NeuralNetworkService.py#__init__(): encountered unimplemented code")
+            raise Exception("NeuralNetworkService.py#__init__(): encountered invalid network_type argument or that "
+                            "NetworkType is not currently supported")
 
     def train(self) -> None:
         # TODO

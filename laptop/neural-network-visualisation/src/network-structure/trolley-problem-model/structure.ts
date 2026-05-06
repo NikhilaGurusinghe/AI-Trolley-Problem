@@ -2,30 +2,47 @@
 import Neuron from "./neuron.ts"
 import * as assert from "node:assert";
 
+export type WeightsArray = number[][];
+export type BiasesArray = number[];
+
+export type TrolleyProblemModelStructure = {
+    "layer_1.weight": WeightsArray;
+    "layer_1.bias": BiasesArray;
+    "layer_2.weight": WeightsArray;
+    "layer_2.bias": BiasesArray;
+    "layer_3.weight": WeightsArray;
+    "layer_3.bias": BiasesArray
+}
+
 export default class Structure {
 
     private readonly layers: Layer[];
 
-    public constructor(allWeightsAndBiases: [number[][], number[]][]) {
+    public constructor(allWeightsAndBiases?: [WeightsArray, BiasesArray][]) {
         this.layers = [];
 
+        if (allWeightsAndBiases === undefined) return;
+        this.initialize(allWeightsAndBiases)
+    }
+
+    public initialize(allWeightsAndBiases: [WeightsArray, BiasesArray][]): void {
         for (let layerIndex: number = 0; layerIndex < allWeightsAndBiases.length; layerIndex++) {
-            let [weights, biases]: [number[][], number[]] = allWeightsAndBiases[layerIndex] as [number[][], number[]];
+            const [weights, biases]: [WeightsArray, BiasesArray] = allWeightsAndBiases[layerIndex] as [number[][], number[]];
 
             // should be the same length as there will be the same amount of neurons
             // for weights there might be multiple per neuron, but always a single bias per neuron
             assert.ok(weights.length === biases.length)
 
-            let layerNeurons: Neuron[] = []
+            const layerNeurons: Neuron[] = []
 
             for (let neuronIndex: number = 0; neuronIndex < weights.length; neuronIndex++) {
-                let neuronWeights: number[] = weights[neuronIndex] as number[];
-                let neuronBias: number = biases[neuronIndex] as number;
+                const neuronWeights: number[] = weights[neuronIndex] as number[];
+                const neuronBias: number = biases[neuronIndex] as number;
 
                 layerNeurons.push(new Neuron(neuronWeights, neuronBias));
             }
 
-            let newLayer: Layer = new Layer(layerNeurons);
+            const newLayer: Layer = new Layer(layerNeurons);
             this.layers.push(newLayer);
         }
     }
@@ -36,7 +53,7 @@ export default class Structure {
 
     // layerIndex is zero indexed
     public getNumberOfNeuronsInLayer(layerIndex: number) : number | undefined {
-        let layer: Layer | undefined = this.getLayer(layerIndex);
+        const layer: Layer | undefined = this.getLayer(layerIndex);
         if (layer === undefined) return undefined;
 
         return layer.getNumberOfNeurons();
@@ -49,14 +66,14 @@ export default class Structure {
     }
 
     private getNeuron(layerIndex: number, neuronIndex: number): Neuron | undefined {
-        let layer: Layer | undefined = this.getLayer(layerIndex);
+        const layer: Layer | undefined = this.getLayer(layerIndex);
         if (layer === undefined) return undefined;
 
         return layer.getNeuron(neuronIndex);
     }
 
     public getOutputImportancesForNeuron(layerIndex: number, neuronIndex: number): number[] | undefined {
-        let neuron: Neuron | undefined = this.getNeuron(layerIndex, neuronIndex);
+        const neuron: Neuron | undefined = this.getNeuron(layerIndex, neuronIndex);
         if (neuron === undefined) return undefined;
 
         // TODO math here

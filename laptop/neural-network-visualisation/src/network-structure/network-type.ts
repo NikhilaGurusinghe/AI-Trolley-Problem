@@ -1,0 +1,4 @@
+export enum NetworkType {
+    TROLLEY_PROBLEM_MODEL,
+    SPRITE_RECOGNITION_MODEL
+}
