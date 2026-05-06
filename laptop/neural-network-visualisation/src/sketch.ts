@@ -13,8 +13,8 @@ const sketch = (p5: p5): void => {
 		p5.createCanvas(p5.windowWidth, p5.windowHeight);
 
 		websocket = new NeuralNetworkClient(WEBSOCKET_HOST_NAME, WEBSOCKET_PORT_NUMBER);
-        console.log(await websocket.getNetworkStructure(NetworkType.SPRITE_RECOGNITION_MODEL).catch((reason: any) => console.log(reason)));
-        console.log(await websocket.getNetworkStructure(NetworkType.TROLLEY_PROBLEM_MODEL).catch((reason: any) => console.log(reason)));
+        console.log(await websocket.getNetworkStructure(NetworkType.SPRITE_RECOGNITION_MODEL).catch((reason: unknown) => console.log(reason)));
+        console.log(await websocket.getNetworkStructure(NetworkType.TROLLEY_PROBLEM_MODEL).catch((reason: unknown) => console.log(reason)));
 	};
 
 	p5.draw = () => {

@@ -15,7 +15,7 @@ export class NeuralNetworkClient extends Client {
         super(hostName, portNumber);
 
         // we do this manually cause it seems really difficult to do this automatically in typescript :/
-        this.allowedNotificationMethods.set("setNetworkStructure", this.setNetworkStructure);
+        this.allowedNotificationMethods.set("setNetworkStructure", this.setNetworkStructure.bind(this));
         console.log(this.allowedNotificationMethods)
 
         this.trolleyProblemModel = new Structure();
@@ -50,6 +50,9 @@ export class NeuralNetworkClient extends Client {
                 console.log(structure["layer_2.weight"], structure["layer_2.bias"]);
                 console.log(structure["layer_3.weight"], structure["layer_3.bias"]);
 
+                this.trolleyProblemModel.initialize([[structure["layer_1.weight"], structure["layer_1.bias"]],
+                                                     [structure["layer_2.weight"], structure["layer_2.bias"]],
+                                                     [structure["layer_3.weight"], structure["layer_3.bias"]]]);
 
                 break;
             }

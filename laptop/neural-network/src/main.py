@@ -18,7 +18,7 @@ def serial_thread(loop):
     # ... read serial
     sleep(5)
     print("adding to queue")
-    event = ("setNetworkStructure", {"network_type": NetworkType.SPRITE_RECOGNITION_MODEL})
+    event = ("setNetworkStructure", {"network_type": NetworkType.TROLLEY_PROBLEM_MODEL})
     asyncio.run_coroutine_threadsafe(event_queue.put(event), loop)
 
 async def event_consumer(server: NeuralNetworkServer):

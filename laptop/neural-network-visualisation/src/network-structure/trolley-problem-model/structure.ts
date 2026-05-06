@@ -21,8 +21,9 @@ export default class Structure {
     public constructor(allWeightsAndBiases?: [WeightsArray, BiasesArray][]) {
         this.layers = [];
 
-        if (allWeightsAndBiases === undefined) return;
-        this.initialize(allWeightsAndBiases)
+        if (allWeightsAndBiases !== undefined) {
+            this.initialize(allWeightsAndBiases)
+        }
     }
 
     public initialize(allWeightsAndBiases: [WeightsArray, BiasesArray][]): void {
