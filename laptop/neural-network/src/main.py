@@ -1,25 +1,7 @@
 import asyncio
-import os
-import time
 
-import numpy as np
-import pandas as pd
-import torch
-import torchmetrics
-from torch import nn
-import matplotlib.pyplot as plt
-from skimage import io, transform
-from torch.utils.data import DataLoader, sampler, RandomSampler
-from torchvision import transforms, utils
-from torchvision.transforms import InterpolationMode
-
-from data.InputOutputEnums import Entity, Track
-from data.Transforms import *
-from data.sprite.SpriteDataset import SpriteDataset
-from models.SpriteRecognitionModel import SpriteRecognitionModel
-from models.TrolleyProblemModel import TrolleyProblemModel
-from models.utils.TrainingUtils import calculate_accuracy
-from websocket.server import Server
+from common.websocket.server import Server
+from services.neural_network.api.neural_network_server import NeuralNetworkServer
 
 # TTS library https://github.com/nateshmbhat/pyttsx3
 
@@ -183,6 +165,6 @@ if __name__ == '__main__':
     # print(f'elapsed time for train and inference was {end_time - start_time:.3f}s')
     # print("started:")
 
-    server: Server = Server("", port_number=8001)
+    server: Server = NeuralNetworkServer("", port_number=8001)
     print("Server started!")
     asyncio.run(server.loop())

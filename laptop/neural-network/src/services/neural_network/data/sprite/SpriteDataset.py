@@ -37,7 +37,7 @@ class SpriteDataset(Dataset):
         classification = self.labelled_sprites.iloc[index, 1:]
         classification = np.array(self.labelled_sprites.iloc[index, 1:], dtype=float)
         classification = torch.argmax(torch.from_numpy(classification), dim=0)
-        sample = {"image": image, "classification": classification }
+        sample = { "image": image, "classification": classification }
 
         if self.transform:
             sample["image"] = self.transform(sample["image"])
