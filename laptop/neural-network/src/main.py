@@ -1,7 +1,7 @@
 import asyncio
 
 from common.websocket.server import Server
-from services.neural_network.api.neural_network_server import NeuralNetworkServer
+from services.neural_network.api.NeuralNetworkServer import NeuralNetworkServer
 
 # TTS library https://github.com/nateshmbhat/pyttsx3
 

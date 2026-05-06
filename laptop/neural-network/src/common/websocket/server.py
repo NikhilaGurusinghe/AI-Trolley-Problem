@@ -12,7 +12,6 @@ class Server:
     async def _receive(self, websocket) -> None:
         async for message in websocket:
             print(message)
-            # TODO get responseID from message and send this back with response
             message_json = json.loads(message)
             message_id = message_json.get("id")
             message_type = message_json.get("type")
@@ -31,7 +30,8 @@ class Server:
             try:
                 responsePayload = self.allowed_methods[message_type](*arguments)
                 response: dict[str, Any] = { "id": message_id, "payload": responsePayload }
-            except Exception as _:
+            except Exception as e:
+                print(e.__str__())
                 response: dict[str, Any] = { "id": message_id, "error": "internal server error" }
 
             await self._send(websocket, response)

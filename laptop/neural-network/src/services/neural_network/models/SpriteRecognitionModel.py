@@ -3,7 +3,7 @@ from typing import Callable
 import torch
 from torch import nn
 
-from src.models.utils.TrainingParams import TrainingParams
+from src.services.neural_network.models.utils.TrainingParams import TrainingParams
 
 
 # https://www.learnpytorch.io/03_pytorch_computer_vision/#7-model-2-building-a-convolutional-neural-network-cnn

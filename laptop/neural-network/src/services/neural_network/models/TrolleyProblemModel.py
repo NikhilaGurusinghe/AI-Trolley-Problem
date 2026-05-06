@@ -3,8 +3,8 @@ from collections.abc import Callable
 import torch
 from torch import nn
 
-from src.models.utils.TrainingParams import TrainingParams
-from src.models.utils.TrainingUtils import get_train_test_split
+from src.services.neural_network.models.utils.TrainingParams import TrainingParams
+from src.services.neural_network.models.utils.TrainingUtils import get_train_test_split
 
 
 # https://www.learnpytorch.io/02_pytorch_classification/
