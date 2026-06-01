@@ -1,14 +1,12 @@
 import Client, {type NotificationMethod} from "./client.ts";
 import Structure, {
-    type BiasesArray,
+    type BiasesArray, convertToTrolleyProblemModelStructure,
     type TrolleyProblemModelStructure,
     type WeightsArray
 } from "../network-structure/trolley-problem-model/structure.ts";
 import {NetworkType} from "../network-structure/network-type.ts";
 
 export class NeuralNetworkClient extends Client {
-    // TODO this needs to have a service that stores network-structure data structures
-
     private readonly trolleyProblemModel: Structure;
 
     constructor(hostName: string, portNumber: number) {
@@ -25,13 +23,12 @@ export class NeuralNetworkClient extends Client {
         return this.send("get_network_structure", [network]);
     }
 
-    // TODO networkType stuff -- add a switch statement
     // TODO finish this!!!!
     public setNetworkStructure(structurePayload: string, networkType: string): void {
         console.log("NeuralNetworkClient#setNetworkStructure(): setting network structure!");
         console.log(structurePayload);
 
-        let structureJSON: unknown;
+        let structureJSON: any;
         try {
             structureJSON = JSON.parse(structurePayload);
         } catch (e) {
@@ -44,7 +41,22 @@ export class NeuralNetworkClient extends Client {
             }
             case NetworkType.TROLLEY_PROBLEM_MODEL: {
                 // TODO do error checking here before this cast
-                const structure: TrolleyProblemModelStructure = structureJSON as TrolleyProblemModelStructure;
+
+                if (structureJSON["layer_1.weight"] === undefined ||
+                    structureJSON["layer_1.bias"] === undefined ||
+                    structureJSON["layer_2.weight"] === undefined ||
+                    structureJSON["layer_2.bias"] === undefined ||
+                    structureJSON["layer_3.weight"] === undefined ||
+                    structureJSON["layer_3.bias"] === undefined) {
+                    
+                }
+
+                const structure: TrolleyProblemModelStructure | undefined =
+                    convertToTrolleyProblemModelStructure(structureJSON);
+                if (structure === undefined) {
+                    throw new Error("NeuralNetworkClient#setNetworkStructure(): received bad neural network" +
+                        " structure JSON");
+                }
 
                 console.log(structure["layer_1.weight"], structure["layer_1.bias"]);
                 console.log(structure["layer_2.weight"], structure["layer_2.bias"]);
@@ -60,12 +72,5 @@ export class NeuralNetworkClient extends Client {
                 throw new Error(`NeuralNetworkClient#setNetworkStructure(): received malformed arguments`);
             }
         }
-
-
-
-
-
-
-
     }
 }

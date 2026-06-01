@@ -14,6 +14,19 @@ export type TrolleyProblemModelStructure = {
     "layer_3.bias": BiasesArray
 }
 
+export function convertToTrolleyProblemModelStructure(structureJSON: any): TrolleyProblemModelStructure | undefined {
+    if (structureJSON["layer_1.weight"] === undefined ||
+        structureJSON["layer_1.bias"] === undefined ||
+        structureJSON["layer_2.weight"] === undefined ||
+        structureJSON["layer_2.bias"] === undefined ||
+        structureJSON["layer_3.weight"] === undefined ||
+        structureJSON["layer_3.bias"] === undefined) {
+        return undefined;
+    } else {
+        return structureJSON as TrolleyProblemModelStructure;
+    }
+}
+
 export default class Structure {
 
     private readonly layers: Layer[];
