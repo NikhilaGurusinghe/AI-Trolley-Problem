@@ -1,4 +1,5 @@
-﻿import threading
+﻿import random
+import threading
 from asyncio import timeout
 from queue import Queue
 from typing import Tuple
@@ -20,7 +21,8 @@ class TTSService:
         engine.setProperty("volume", 0.5)
 
         voices = engine.getProperty("voices")
-        engine.setProperty("voice", voices[1].id)
+        if voices:
+            engine.setProperty("voice", random.choice(voices).id)
 
         while True:
             item: Tuple[str, threading.Event] | str | None = self._queue.get()

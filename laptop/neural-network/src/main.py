@@ -7,6 +7,7 @@ from typing import Dict
 
 import torch
 
+from common.utils.bsod import crash_system
 from common.websocket.server import Server
 from services.neural_network.api.NeuralNetworkServer import NeuralNetworkServer
 from services.neural_network.api.utils.WebsocketQueuedDispatcher import WebsocketQueuedDispatcher
@@ -16,8 +17,6 @@ from services.serial.TrackDirection import flip_direction
 from services.state.StateMachine import StateMachine
 from services.state.story.AssetManager import ImageTuple
 from services.tts.TTSService import TTSService
-
-# event_queue = asyncio.Queue()
 
 def serial_thread(current_running_loop: AbstractEventLoop,
                   dispatcher: WebsocketQueuedDispatcher,
@@ -32,7 +31,7 @@ def serial_thread(current_running_loop: AbstractEventLoop,
 
     print("start!")
 
-    tts.speak(state.assets_manager.get_dialogue(state.current_state, state.current_iteration), True)
+    tts.speak("hello...  this is a pause.", True)
     print("hello!")
 
     arduino = SerialService("COM7", 115200)
@@ -62,6 +61,9 @@ def serial_thread(current_running_loop: AbstractEventLoop,
         # flip based on orientation of the tap controller thingy (its opposite)
         print(arduino.send_track_direction(flip_direction(tap_response)))
 
+        # say line whilst train is moving
+        tts.speak(state.assets_manager.get_dialogue(state.current_state, state.current_iteration), False)
+
         # training
         training_data: Dict[str, torch.Tensor] = state.assets_manager.get_training_data(tap_response,
                                                                                         state.current_iteration)
@@ -71,10 +73,13 @@ def serial_thread(current_running_loop: AbstractEventLoop,
         update_event = ("setNetworkStructure", {"network_type": NetworkType.TROLLEY_PROBLEM_MODEL})
         asyncio.run_coroutine_threadsafe(dispatcher.event_queue.put(update_event), current_running_loop)
 
-        # say line whilst train is moving
-        tts.speak(state.assets_manager.get_dialogue(state.current_state, state.current_iteration))
+        time.sleep(10)
 
         state.update() # current state = START_AI_TURN
+
+        # draw AI turn images
+        images: ImageTuple = state.assets_manager.get_ai_turn_image(state.current_iteration)
+        print(arduino.send_images(images.image_a_index, images.image_b_index))
 
         # TODO onwards
         input_tensor = state.assets_manager.get_inference_data(tap_response, state.current_iteration) #torch.tensor([[0.0, 0.0, 123.0, 0.0]], dtype=torch.float32)
@@ -95,6 +100,10 @@ def serial_thread(current_running_loop: AbstractEventLoop,
 
 
         state.update()  # reset!
+
+        if state.current_iteration >= 3:
+            # do ending sequence
+            pass
 
     pass
 
