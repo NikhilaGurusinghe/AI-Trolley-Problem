@@ -3,6 +3,7 @@ import threading
 import time
 from asyncio import AbstractEventLoop
 from time import sleep
+from typing import Dict
 
 import torch
 
@@ -26,19 +27,14 @@ def serial_thread(current_running_loop: AbstractEventLoop,
     event = ("setNetworkStructure", {"network_type": NetworkType.TROLLEY_PROBLEM_MODEL})
     asyncio.run_coroutine_threadsafe(dispatcher.event_queue.put(event), current_running_loop)
 
-    input_tensor = torch.tensor([[0.0, 0.0, 123.0, 0.0]], dtype=torch.float32)
+    tts = TTSService()
+    state = StateMachine()
 
-    try:
-        prediction = server.inference_network(NetworkType.TROLLEY_PROBLEM_MODEL, input_tensor)
-    except Exception as e:
-        print("main#serial_thread(): inference failed", e)
-        prediction = None
+    print("start!")
 
-    if prediction is not None:
-        result_raw: int = int(prediction.item())
-        result_direction: TrackDirection = TrackDirection(result_raw)
-        print(result_direction)
-    #
+    tts.speak(state.assets_manager.get_dialogue(state.current_state, state.current_iteration), True)
+    print("hello!")
+
     # arduino = SerialService("COM7", 115200)
     # state = StateMachine()
     # tts = TTSService()
@@ -48,6 +44,7 @@ def serial_thread(current_running_loop: AbstractEventLoop,
     #
     # # TODO think about which calls block, might have to run audio in a seperate thread at times
     # while True:
+    #     # current state = USER_INPUT
     #     # get images and send them to the displays
     #     print("start")
     #     images: ImageTuple = state.assets_manager.get_image(state.current_iteration)
@@ -55,24 +52,51 @@ def serial_thread(current_running_loop: AbstractEventLoop,
     #
     #     # say something at the start of an iteration, whilst loading stuff on displays
     #     # this blocks!
-    #     # tts.speak(state.assets_manager.get_dialogue(state.current_state, state.current_iteration))
+    #     tts.speak(state.assets_manager.get_dialogue(state.current_state, state.current_iteration))
     #
     #     # wait to get tap response
     #     tap_response: TrackDirection = arduino.get_tap_response()
     #
     #     print(tap_response.name)
-    #     state.update()
-    #
-    #     # TODO inference here
+    #     state.update() # current state = END
     #
     #     # flip based on orientation of the tap controller thingy (its opposite)
     #     print(arduino.send_track_direction(flip_direction(tap_response)))
     #
-    #     # say line whilst train is moving
-    #     # tts.speak(state.assets_manager.get_dialogue(state.current_state, state.current_iteration))
+    #     # training
+    #     training_data: Dict[str, torch.Tensor] = state.assets_manager.get_training_data(tap_response,
+    #                                                                                     state.current_iteration)
+    #     training_event = ("train", {"network_type": NetworkType.TROLLEY_PROBLEM_MODEL, "training_data": training_data})
+    #     asyncio.run_coroutine_threadsafe(dispatcher.event_queue.put(training_event), current_running_loop)
+    #     # send notification to clients that we've trained the network
+    #     update_event = ("setNetworkStructure", {"network_type": NetworkType.TROLLEY_PROBLEM_MODEL})
+    #     asyncio.run_coroutine_threadsafe(dispatcher.event_queue.put(update_event), current_running_loop)
     #
-    #     # reset!
-    #     state.update()
+    #     # say line whilst train is moving
+    #     tts.speak(state.assets_manager.get_dialogue(state.current_state, state.current_iteration))
+    #
+    #     state.update() # current state = START_AI_TURN
+    #
+    #     # TODO onwards
+    #     input_tensor = torch.tensor([[0.0, 0.0, 123.0, 0.0]], dtype=torch.float32)
+    #
+    #     try:
+    #         prediction = server.inference_network(NetworkType.TROLLEY_PROBLEM_MODEL, input_tensor)
+    #     except Exception as e:
+    #         print("main#serial_thread(): inference failed", e)
+    #         prediction = None
+    #
+    #     if prediction is not None:
+    #         result_raw: int = int(prediction.item())
+    #         result_direction: TrackDirection = TrackDirection(result_raw)
+    #         print(result_direction)
+    #
+    #     state.update()  # current state = END_AI_TURN
+    #
+    #
+    #
+    #     state.update()  # reset!
+
     pass
 
 async def main():

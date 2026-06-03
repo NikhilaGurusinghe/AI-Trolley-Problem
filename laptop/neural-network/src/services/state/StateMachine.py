@@ -14,6 +14,7 @@ class StateMachine:
     def update(self):
         self._next_state()
 
+    # TODO update this
     def _next_state(self):
         if self.current_state == States.USER_INPUT:
             self.current_state = States.END
