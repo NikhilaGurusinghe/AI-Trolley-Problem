@@ -62,21 +62,49 @@ export default class Structure {
     }
 
     public getNumberOfLayers() : number {
-        return this.layers.length;
+        // + 1 for "fake" input layer
+        return this.layers.length + 1;
     }
 
     // layerIndex is zero indexed
     public getNumberOfNeuronsInLayer(layerIndex: number) : number | undefined {
-        const layer: Layer | undefined = this.getLayer(layerIndex);
-        if (layer === undefined) return undefined;
+        if (layerIndex < 0) return undefined;
 
-        return layer.getNumberOfNeurons();
+        if (layerIndex === 0) {
+            // infer input layer neurons number from the first hidden layer's incoming weights array size
+            if (this.layers[0] === undefined) {
+                return undefined;
+                //throw new Error("Structure.getNumberOfNeuronsInLayer(): had no layers")
+            }
+
+            // checking there's a neuron here
+            const firstLayer: Layer = this.layers[0];
+
+            // getting just the first neuron and getting the length of its weights array
+            const neuron: Neuron | undefined = firstLayer.getNeuron(0);
+            if (neuron === undefined) {
+                return undefined;
+                //throw new Error("Structure.getNumberOfNeuronsInLayer(): had no neurons in layer 0")
+            }
+            const weightsArray: number[] = neuron.getWeights();
+            return weightsArray.length;
+        } else {
+            const layer: Layer | undefined = this.getLayer(layerIndex);
+            if (layer === undefined) return undefined;
+
+            return layer.getNumberOfNeurons();
+        }
     }
 
+    // 0 = input layer doesn't exist here, 1..N = layers stored in this structure object
     private getLayer(layerIndex: number): Layer | undefined {
-        if (layerIndex >= this.layers.length) return undefined;
-
-        return this.layers[layerIndex] as Layer;
+        if (layerIndex === 0) {
+            // there is no Layer object for the input layer
+            return undefined;
+        }
+        const internalIndex: number = layerIndex - 1;
+        if (internalIndex >= this.layers.length) return undefined;
+        return this.layers[internalIndex] as Layer;
     }
 
     private getNeuron(layerIndex: number, neuronIndex: number): Neuron | undefined {
@@ -87,12 +115,39 @@ export default class Structure {
     }
 
     public getOutputImportancesForNeuron(layerIndex: number, neuronIndex: number): number[] | undefined {
-        const neuron: Neuron | undefined = this.getNeuron(layerIndex, neuronIndex);
-        if (neuron === undefined) return undefined;
+        // we actually need to get the importances for the next layer
+        // if this is the final layer there are no outputs
+        if (layerIndex >= this.getNumberOfLayers() - 1 || neuronIndex < 0) return undefined;
+        const nextLayer: Layer | undefined = this.getLayer(layerIndex + 1);
+        if (nextLayer === undefined) return undefined;
 
-        // TODO math here
+        const outputImportances: number[] = [];
+        const nextLayerSize: number = nextLayer.getNumberOfNeurons();
 
+        // for each neuron in the next layer compute importance from weights + biases
+        for (let nextNeuronIndex: number = 0; nextNeuronIndex < nextLayerSize; nextNeuronIndex++) {
+            const nextNeuron: Neuron | undefined = nextLayer.getNeuron(nextNeuronIndex);
 
-        return [];
+            if (nextNeuron === undefined) {
+                outputImportances.push(0);
+                // throw new Error("Structure.getOutputImportancesForLayer(): encountered invalid neuron in" +
+                //     " layer");
+                continue;
+            }
+
+            const weights: number[] = nextNeuron.getWeights();
+            if (neuronIndex >= weights.length) {
+                outputImportances.push(0);
+                continue;
+                // throw new Error("Structure.getOutputImportancesForLayer(): neuronIndex parameter was larger " +
+                //     "than the number of weights in layer");
+            }
+            let weight: number = weights[neuronIndex] as number;
+            const bias: number = nextNeuron.getBias();
+            const importance: number = weight * (1 + Math.abs(bias));
+            outputImportances.push(importance);
+        }
+
+        return outputImportances;
     }
 }

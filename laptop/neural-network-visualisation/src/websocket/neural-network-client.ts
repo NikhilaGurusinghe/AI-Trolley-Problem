@@ -7,7 +7,7 @@ import Structure, {
 import {NetworkType} from "../network-structure/network-type.ts";
 
 export class NeuralNetworkClient extends Client {
-    private readonly trolleyProblemModel: Structure;
+    public readonly trolleyProblemModel: Structure;
 
     constructor(hostName: string, portNumber: number) {
         super(hostName, portNumber);
@@ -28,6 +28,9 @@ export class NeuralNetworkClient extends Client {
         console.log("NeuralNetworkClient#setNetworkStructure(): setting network structure!");
         console.log(structurePayload);
 
+        // TODO this has to signal the p5.js draw stuff that we've updated the model and we need to update the
+        //  visual representation
+
         let structureJSON: any;
         try {
             structureJSON = JSON.parse(structurePayload);
@@ -40,17 +43,6 @@ export class NeuralNetworkClient extends Client {
                 break;
             }
             case NetworkType.TROLLEY_PROBLEM_MODEL: {
-                // TODO do error checking here before this cast
-
-                if (structureJSON["layer_1.weight"] === undefined ||
-                    structureJSON["layer_1.bias"] === undefined ||
-                    structureJSON["layer_2.weight"] === undefined ||
-                    structureJSON["layer_2.bias"] === undefined ||
-                    structureJSON["layer_3.weight"] === undefined ||
-                    structureJSON["layer_3.bias"] === undefined) {
-                    
-                }
-
                 const structure: TrolleyProblemModelStructure | undefined =
                     convertToTrolleyProblemModelStructure(structureJSON);
                 if (structure === undefined) {
