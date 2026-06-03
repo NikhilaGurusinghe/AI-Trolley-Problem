@@ -1,4 +1,9 @@
-﻿from services.state.States import States
+﻿from typing import List, Dict
+
+import torch
+
+from services.serial.TrackDirection import TrackDirection
+from services.state.States import States
 
 
 class ImageTuple:
@@ -10,14 +15,17 @@ class ImageTuple:
 
 class AssetManager:
     def __init__(self):
-        self.images = [ImageTuple(15, "child", 19, "cat"),
+        self._images = [ImageTuple(15, "child", 19, "cat"),
                        ImageTuple(15, "child", 23, "older person")]
-        # self.start_dialogue = ["Hello", "Hello hello"]
         self._user_input_dialogue = ["Touch the screen", "Touch the screen"]
         self._end_dialogue = ["restarting", "restarting"]
 
+        # TODO populate this
+        # _training_data[iteration][track_index] => dict with tensors e.g. {"X": Tensor, "y": Tensor}
+        self._training_data: List[List[Dict[str, torch.Tensor]]] = [[]]
+
     def get_image(self, state_current_iteration: int) -> ImageTuple:
-        return self.images[state_current_iteration]
+        return self._images[state_current_iteration]
 
     def get_dialogue(self, state_current_state: States, state_current_iteration: int) -> str:
         # way to return f-strings with image_x_descriptions in
@@ -27,3 +35,6 @@ class AssetManager:
             return self._end_dialogue[state_current_iteration]
 
         raise ValueError("invalid state")
+
+    def get_training_data(self, track_direction: TrackDirection, state_current_iteration: int) -> dict[str, torch.Tensor]:
+        return self._training_data[state_current_iteration][track_direction.value]
