@@ -16,12 +16,19 @@ class ImageTuple:
 class AssetManager:
     def __init__(self):
         self._images: List[ImageTuple] = \
-            [ImageTuple(15, "child", 19, "cat"),
-            ImageTuple(15, "child", 23, "older person")]
-        self._user_input_dialogue: List[str] = ["Touch the screen", "Touch the screen"]
-        self._end_dialogue: List[str] = ["restarting", "restarting"]
+            [ImageTuple(15, "cat", 19, "horse"),
+            ImageTuple(15, "young human", 23, "cat"),
+             ImageTuple(15, "disabled person", 23, "man")]
+        self._images_AI_turn: List[ImageTuple] = \
+            [ImageTuple(15, "young human", 23, "cat"),
+             ImageTuple(15, "young human", 23, "older human"),
+             ImageTuple(15, "disabled person", 23, "man")] # TODO
+        self._user_input_dialogue: List[str] = ["Okay so on your screens you'll see whats one the tracks, just tap the screen that you want to run over. Got it?",
+                                                "Okay that was not great for your first day... Let's see if we can fix this, tap the screen of what... or who you want to run over, okay?",
+                                                ]
+        self._end_dialogue: List[List[str]] = [["restarting", "restarting"]]
         self._start_AI_turn_dialogue: List[str] = ["now its the AI turn", "AI turn"]
-        self._end_AI_turn_dialogue: List[str] = ["oh no", "oh no what have we done?"]
+        self._end_AI_turn_dialogue: List[List[str]] = [["oh no", "oh no what have we done?"]]
 
         # TODO populate this
         # _training_data[iteration][track_index] => dict with tensors e.g. {"X": Tensor, "y": Tensor}
