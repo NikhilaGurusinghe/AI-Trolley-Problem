@@ -11,23 +11,30 @@ const sketch = (p5: p5): void => {
 	let websocket: NeuralNetworkClient;
 	let networkVisualiser: NetworkVisualiser
 
-	p5.setup = async () => {
+	p5.setup = () => {
 		p5.createCanvas(p5.windowWidth, p5.windowHeight);
 
 		websocket = new NeuralNetworkClient(WEBSOCKET_HOST_NAME, WEBSOCKET_PORT_NUMBER);
 		networkVisualiser = new NetworkVisualiser(websocket.trolleyProblemModel, p5);
+
+		websocket.onModelUpdate((): void => {
+			p5.background(180);
+			networkVisualiser.draw();
+		})
+
+
 	};
 
 	p5.draw = () => {
 
 
-		p5.background(180);
-		p5.ellipseMode(p5.CENTER);
-		p5.fill(255, 0, 0);
-		p5.noStroke();
-		p5.ellipse(p5.mouseX, p5.mouseY, 50, 50);
-
-		networkVisualiser.draw();
+		// p5.background(180);
+		// p5.ellipseMode(p5.CENTER);
+		// p5.fill(255, 0, 0);
+		// p5.noStroke();
+		// p5.ellipse(p5.mouseX, p5.mouseY, 50, 50);
+		//
+		// networkVisualiser.draw();
 
 	};
 
