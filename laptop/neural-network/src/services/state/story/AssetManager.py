@@ -15,10 +15,13 @@ class ImageTuple:
 
 class AssetManager:
     def __init__(self):
-        self._images = [ImageTuple(15, "child", 19, "cat"),
-                       ImageTuple(15, "child", 23, "older person")]
-        self._user_input_dialogue = ["Touch the screen", "Touch the screen"]
-        self._end_dialogue = ["restarting", "restarting"]
+        self._images: List[ImageTuple] = \
+            [ImageTuple(15, "child", 19, "cat"),
+            ImageTuple(15, "child", 23, "older person")]
+        self._user_input_dialogue: List[str] = ["Touch the screen", "Touch the screen"]
+        self._end_dialogue: List[str] = ["restarting", "restarting"]
+        self._start_AI_turn_dialogue: List[str] = ["now its the AI turn", "AI turn"]
+        self._end_AI_turn_dialogue: List[str] = ["oh no", "oh no what have we done?"]
 
         # TODO populate this
         # _training_data[iteration][track_index] => dict with tensors e.g. {"X": Tensor, "y": Tensor}
@@ -35,6 +38,10 @@ class AssetManager:
             return self._user_input_dialogue[state_current_iteration]
         elif state_current_state == States.END:
             return self._end_dialogue[state_current_iteration]
+        elif state_current_state == States.START_AI_TURN:
+            return self._start_AI_turn_dialogue[state_current_iteration]
+        elif state_current_state == States.END_AI_TURN:
+            return self._end_AI_turn_dialogue[state_current_iteration]
 
         raise ValueError("invalid state")
 
