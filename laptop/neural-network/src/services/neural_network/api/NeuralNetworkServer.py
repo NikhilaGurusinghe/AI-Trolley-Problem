@@ -1,5 +1,7 @@
 import json
-from typing import Callable
+from typing import Callable, Any
+
+from sklearn.externals.array_api_compat import torch
 
 from common.websocket.server import Server
 from services.neural_network.NeuralNetworkService import NeuralNetworkService
@@ -26,3 +28,15 @@ class NeuralNetworkServer(Server):
         structure: dict[str, list] = self.all_models[int(network_type)].get_network_structure()
 
         return json.dumps(structure)
+
+    def train_network(self, network_type: NetworkType, training_data: dict[str, torch.Tensor]):
+        if int(network_type) < 0 or int(network_type) >= len(NetworkType):
+            raise Exception("NeuralNetworkServer#train_network(): failed to execute (invalid arguments)")
+
+        self.all_models[int(network_type)].train(training_data)
+
+    def inference_network(self, network_type: NetworkType, input_data: torch.Tensor) -> torch.Tensor:
+        if int(network_type) < 0 or int(network_type) >= len(NetworkType):
+            raise Exception("NeuralNetworkServer#inference_network(): failed to execute (invalid arguments)")
+
+        return self.all_models[int(network_type)].inference(input_data)

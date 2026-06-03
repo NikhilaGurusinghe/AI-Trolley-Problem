@@ -1,3 +1,5 @@
+from typing import Any
+
 import torch
 from torch import nn
 
@@ -35,13 +37,23 @@ class NeuralNetworkService:
             raise Exception("NeuralNetworkService.py#__init__(): encountered invalid network_type argument or that "
                             "NetworkType is not currently supported")
 
-    def train(self) -> None:
-        # TODO
-        pass
+    def train(self, training_data: dict[str, torch.Tensor]) -> None:
+        if isinstance(self.model_wrapper, TrolleyProblemModel):
+            self.model_wrapper.train(training_data["X"], training_data["y"])
+        elif isinstance(self.model_wrapper, SpriteRecognitionModel):
+            # TODO implement this
+            raise TypeError("NeuralNetworkService#train(): Not implemented")
+        else:
+            raise TypeError("NeuralNetworkService#train(): unsupported model_wrapper type, internal error")
 
-    def inference(self) -> torch.Tensor:
-        # TODO
-        pass
+    def inference(self, input_data: torch.Tensor) -> torch.Tensor:
+        if isinstance(self.model_wrapper, TrolleyProblemModel):
+            return self.model_wrapper.inference(input_data)
+        elif isinstance(self.model_wrapper, SpriteRecognitionModel):
+            # TODO implement this
+            raise TypeError("NeuralNetworkService#inference(): Not implemented")
+        else:
+            raise TypeError("NeuralNetworkService#inference(): unsupported model_wrapper type, internal error")
 
     def get_network_structure(self) -> dict[str, list]:
         # https://discuss.pytorch.org/t/access-all-weights-of-a-model/77672
