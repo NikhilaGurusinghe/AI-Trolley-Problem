@@ -99,20 +99,20 @@ export class NetworkVisualiser {
                     const strokeWeight: number = minStrokeWeight + normalizedAbsImportance *
                                                  (maxStrokeWeight - minStrokeWeight);
 
-                    // TODO change this to a lerp between blue and red colours
-                    let strokeCol: p5.Color;
+                    // lerp colours between negative and positive
+                    let strokeColour: p5.Color;
                     if (layerAbsoluteMax <= 0) {
-                        strokeCol = neutralStrokeColour;
+                        strokeColour = neutralStrokeColour;
                     } else {
                         // signed normalization in [-1, 1]
                         const signedNorm: number = importance / layerAbsoluteMax;
                         // map to [0,1] for lerp (0 => negative, 1 => positive)
-                        const t: number = Math.max(0, Math.min(1, (signedNorm + 1) / 2));
-                        strokeCol = this.p5.lerpColor(negativeStrokeColour, positiveStrokeColour, t);
+                        const amount: number = Math.max(0, Math.min(1, (signedNorm + 1) / 2));
+                        strokeColour = this.p5.lerpColor(negativeStrokeColour, positiveStrokeColour, amount);
                     }
 
                     this.p5.push();
-                    this.p5.stroke(strokeCol);
+                    this.p5.stroke(strokeColour);
                     this.p5.strokeWeight(strokeWeight);
                     this.p5.line(currNeuronPos.x, currNeuronPos.y, nextNeuronPos.x, nextNeuronPos.y);
                     this.p5.pop();
