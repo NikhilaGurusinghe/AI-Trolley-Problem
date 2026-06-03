@@ -12,7 +12,7 @@ class TTSService:
         voices = self.engine.getProperty("voices")
         self.engine.setProperty("voice", voices[1].id)
 
-    def say(self, text: str):
+    def speak(self, text: str):
         self.engine.say(text)
         self.engine.runAndWait()
         self.engine.stop()
