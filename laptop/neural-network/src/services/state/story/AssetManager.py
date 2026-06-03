@@ -2,6 +2,7 @@
 
 import torch
 
+from services.neural_network.data.InputOutputEnums import Entity
 from services.serial.TrackDirection import TrackDirection
 from services.state.States import States
 
@@ -36,9 +37,145 @@ class AssetManager:
                                                        ["Nice work, see you tomorrow.", "Again? Look down at that screen and let me know why the AI is doing what it just did... Let me call corporate, you should probably go home for today"],
                                                        ["That went better than expected... I think... don't you think?", "Darn... I guess bugs like that just happen sometimes, nothing we can do."]]
 
+        # scenario 0
+        scenario_0_cat_pref = [
+            (Entity.HORSE, 1, Entity.CAT, 1, TrackDirection.LEFT),
+            (Entity.CAT, 2, Entity.HORSE, 3, TrackDirection.RIGHT),
+            (Entity.HORSE, 5, Entity.CAT, 2, TrackDirection.LEFT),
+            (Entity.CAT, 8, Entity.HORSE, 25, TrackDirection.RIGHT),
+            (Entity.HORSE, 30, Entity.CAT, 1, TrackDirection.LEFT),
+            (Entity.CAT, 15, Entity.HORSE, 40, TrackDirection.RIGHT),
+            (Entity.HORSE, 7, Entity.CAT, 7, TrackDirection.LEFT),
+            (Entity.CAT, 20, Entity.HORSE, 20, TrackDirection.RIGHT),
+            (Entity.HORSE, 2, Entity.CAT, 30, TrackDirection.LEFT),
+            (Entity.CAT, 3, Entity.HORSE, 4, TrackDirection.RIGHT),
+            (Entity.HORSE, 12, Entity.CAT, 9, TrackDirection.LEFT),
+            (Entity.CAT, 6, Entity.HORSE, 14, TrackDirection.RIGHT),
+        ]
+        X_list_scenario_0_cat_pref = [[t1.value, age1, t2.value, age2] for (t1, age1, t2, age2, _) in
+                                      scenario_0_cat_pref]
+        y_list_scenario_0_cat_pref = [label.value for (_, _, _, _, label) in scenario_0_cat_pref]
+        X_tensor_scenario_0_cat_pref = torch.tensor(X_list_scenario_0_cat_pref, dtype=torch.float)
+        y_tensor_scenario_0_cat_pref = torch.tensor(y_list_scenario_0_cat_pref, dtype=torch.float)
+
+        scenario_0_horse_pref = [
+            (Entity.HORSE, 1, Entity.CAT, 1, TrackDirection.RIGHT),
+            (Entity.CAT, 2, Entity.HORSE, 3, TrackDirection.LEFT),
+            (Entity.HORSE, 5, Entity.CAT, 2, TrackDirection.RIGHT),
+            (Entity.CAT, 8, Entity.HORSE, 25, TrackDirection.LEFT),
+            (Entity.HORSE, 30, Entity.CAT, 1, TrackDirection.RIGHT),
+            (Entity.CAT, 15, Entity.HORSE, 40, TrackDirection.LEFT),
+            (Entity.HORSE, 7, Entity.CAT, 7, TrackDirection.RIGHT),
+            (Entity.CAT, 20, Entity.HORSE, 20, TrackDirection.LEFT),
+            (Entity.HORSE, 2, Entity.CAT, 30, TrackDirection.RIGHT),
+            (Entity.CAT, 3, Entity.HORSE, 4, TrackDirection.LEFT),
+            (Entity.HORSE, 12, Entity.CAT, 9, TrackDirection.RIGHT),
+            (Entity.CAT, 6, Entity.HORSE, 14, TrackDirection.LEFT),
+        ]
+        X_list_scenario_0_horse_pref = [[t1.value, age1, t2.value, age2] for (t1, age1, t2, age2, _) in
+                                      scenario_0_horse_pref]
+        y_list_scenario_0_horse_pref = [label.value for (_, _, _, _, label) in scenario_0_horse_pref]
+        X_tensor_scenario_0_horse_pref = torch.tensor(X_list_scenario_0_horse_pref, dtype=torch.float)
+        y_tensor_scenario_0_horse_pref = torch.tensor(y_list_scenario_0_horse_pref, dtype=torch.float)
+
+        # scenario 1
+        scenario_1_human_pref = [
+            (Entity.HUMAN, 3, Entity.CAT, 2, TrackDirection.RIGHT),
+            (Entity.HUMAN, 7, Entity.CAT, 5, TrackDirection.RIGHT),
+            (Entity.HUMAN, 11, Entity.CAT, 10, TrackDirection.RIGHT),
+
+            (Entity.CAT, 4, Entity.HUMAN, 2, TrackDirection.LEFT),
+            (Entity.CAT, 9, Entity.HUMAN, 6, TrackDirection.LEFT),
+            (Entity.CAT, 10, Entity.HUMAN, 11, TrackDirection.LEFT),
+
+            # (Entity.HUMAN, 2, Entity.HUMAN, 5, TrackDirection.RIGHT),
+            # (Entity.HUMAN, 8, Entity.HUMAN, 9, TrackDirection.RIGHT),
+            #
+            # (Entity.CAT, 1, Entity.CAT, 7, TrackDirection.LEFT),
+            # (Entity.CAT, 15, Entity.CAT, 3, TrackDirection.LEFT),
+
+            (Entity.HUMAN, 1, Entity.CAT, 30, TrackDirection.RIGHT),
+            (Entity.CAT, 2, Entity.HUMAN, 10, TrackDirection.LEFT),
+        ]
+
+        X_list_scenario_1_human_pref = [[t1.value, age1, t2.value, age2] for (t1, age1, t2, age2, _) in
+                                        scenario_1_human_pref]
+        y_list_scenario_1_human_pref = [label.value for (_, _, _, _, label) in scenario_1_human_pref]
+        X_tensor_scenario_1_human_pref = torch.tensor(X_list_scenario_1_human_pref, dtype=torch.float)
+        y_tensor_scenario_1_human_pref = torch.tensor(y_list_scenario_1_human_pref, dtype=torch.float)
+
+        scenario_1_cat_pref = [
+            (Entity.HUMAN, 4, Entity.CAT, 2, TrackDirection.LEFT),
+            (Entity.HUMAN, 9, Entity.CAT, 6, TrackDirection.LEFT),
+            (Entity.HUMAN, 2, Entity.CAT, 10, TrackDirection.LEFT),
+
+            (Entity.CAT, 3, Entity.HUMAN, 1, TrackDirection.RIGHT),
+            (Entity.CAT, 11, Entity.HUMAN, 5, TrackDirection.RIGHT),
+            (Entity.CAT, 6, Entity.HUMAN, 11, TrackDirection.RIGHT),
+
+            # (Entity.HUMAN, 3, Entity.HUMAN, 8, TrackDirection.RIGHT),
+            # (Entity.HUMAN, 7, Entity.HUMAN, 2, TrackDirection.RIGHT),
+            #
+            # (Entity.CAT, 4, Entity.CAT, 9, TrackDirection.LEFT),
+            # (Entity.CAT, 12, Entity.CAT, 2, TrackDirection.LEFT),
+
+            (Entity.HUMAN, 1, Entity.CAT, 20, TrackDirection.LEFT),
+            (Entity.CAT, 5, Entity.HUMAN, 10, TrackDirection.RIGHT),
+        ]
+
+        X_list_scenario_1_cat_pref = [[t1.value, age1, t2.value, age2] for (t1, age1, t2, age2, _) in
+                                      scenario_1_cat_pref]
+        y_list_scenario_1_cat_pref = [label.value for (_, _, _, _, label) in scenario_1_cat_pref]
+        X_tensor_scenario_1_cat_pref = torch.tensor(X_list_scenario_1_cat_pref, dtype=torch.float)
+        y_tensor_scenario_1_cat_pref = torch.tensor(y_list_scenario_1_cat_pref, dtype=torch.float)
+
+        # scenario 2 "doctor" with ages ~30..55 and "older human" with ages 65+
+        scenario_2_doctor_pref = [
+            (Entity.HUMAN, 35, Entity.HUMAN, 70, TrackDirection.RIGHT),
+            (Entity.HUMAN, 45, Entity.HUMAN, 80, TrackDirection.RIGHT),
+            (Entity.HUMAN, 32, Entity.HUMAN, 68, TrackDirection.RIGHT),
+
+            (Entity.HUMAN, 50, Entity.HUMAN, 72, TrackDirection.LEFT),
+            (Entity.HUMAN, 40, Entity.HUMAN, 85, TrackDirection.LEFT),
+            (Entity.HUMAN, 38, Entity.HUMAN, 66, TrackDirection.LEFT),
+
+            # (Entity.HUMAN, 36, Entity.HUMAN, 44, TrackDirection.RIGHT),
+            # (Entity.HUMAN, 70, Entity.HUMAN, 75, TrackDirection.LEFT),
+        ]
+        X_list_scenario_2_doctor_pref = [[t1.value, age1, t2.value, age2] for (t1, age1, t2, age2, _) in
+                                         scenario_2_doctor_pref]
+        y_list_scenario_2_doctor_pref = [label.value for (_, _, _, _, label) in scenario_2_doctor_pref]
+        X_tensor_scenario_2_doctor_pref = torch.tensor(X_list_scenario_2_doctor_pref, dtype=torch.float)
+        y_tensor_scenario_2_doctor_pref = torch.tensor(y_list_scenario_2_doctor_pref, dtype=torch.float)
+
+        scenario_2_older_pref = [
+            (Entity.HUMAN, 70, Entity.HUMAN, 35, TrackDirection.RIGHT),
+            (Entity.HUMAN, 80, Entity.HUMAN, 45, TrackDirection.RIGHT),
+            (Entity.HUMAN, 68, Entity.HUMAN, 32, TrackDirection.RIGHT),
+
+            (Entity.HUMAN, 72, Entity.HUMAN, 50, TrackDirection.LEFT),
+            (Entity.HUMAN, 85, Entity.HUMAN, 40, TrackDirection.LEFT),
+            (Entity.HUMAN, 66, Entity.HUMAN, 38, TrackDirection.LEFT),
+
+            # (Entity.HUMAN, 34, Entity.HUMAN, 44, TrackDirection.RIGHT),
+            # (Entity.HUMAN, 72, Entity.HUMAN, 78, TrackDirection.LEFT),
+        ]
+        X_list_scenario_2_older_pref = [[t1.value, age1, t2.value, age2] for (t1, age1, t2, age2, _) in
+                                        scenario_2_older_pref]
+        y_list_scenario_2_older_pref = [label.value for (_, _, _, _, label) in scenario_2_older_pref]
+        X_tensor_scenario_2_older_pref = torch.tensor(X_list_scenario_2_older_pref, dtype=torch.float)
+        y_tensor_scenario_2_older_pref = torch.tensor(y_list_scenario_2_older_pref, dtype=torch.float)
+
         # TODO populate this
         # _training_data[iteration][track_index] => dict with tensors e.g. {"X": Tensor, "y": Tensor}
-        self._training_data: List[List[Dict[str, torch.Tensor]]] = [[]]
+        self._training_data: List[List[Dict[str, torch.Tensor]]] = [
+            [{"X": X_tensor_scenario_0_horse_pref, "y": y_tensor_scenario_0_horse_pref},
+             {"X": X_tensor_scenario_0_cat_pref, "y": y_tensor_scenario_0_cat_pref}],
+            [{"X": X_tensor_scenario_1_cat_pref, "y": y_tensor_scenario_1_cat_pref},
+             {"X": X_tensor_scenario_1_human_pref, "y": y_tensor_scenario_1_human_pref}],
+            [{"X": X_tensor_scenario_2_older_pref, "y": y_tensor_scenario_2_older_pref},
+             {"X": X_tensor_scenario_2_doctor_pref, "y": y_tensor_scenario_2_doctor_pref}],
+        ]
         # _inference_data[iteration][track_index] => "X": Tensor
         self._inference_data: List[List[torch.Tensor]] = [[]]
 

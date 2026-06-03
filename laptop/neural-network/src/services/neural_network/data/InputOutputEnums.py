@@ -8,6 +8,8 @@ class Entity(Enum):
     FROG = 4
     KOALA = 5
     PIG = 6
+    HORSE = 7
+    CAT = 8
 
 class Track(Enum):
     ONE = 0
