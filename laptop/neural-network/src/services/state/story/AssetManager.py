@@ -32,7 +32,7 @@ class AssetManager:
                                                ["Oh well, don't beat yourself up at the end of the day, the AI must make a decision.", "Tough decision, but that's why they pay you the big bucks."]]
         self._start_AI_turn_dialogue: List[str] = ["Okay so corporate wants a prototype ASAP, so I think that's enough trained for today. Let's see how it goes on it's own",
                                                    "Let's test the AI out again, everything looks good and we need to ship this model yesterday!",
-                                                   "Unfortunately, the AI that identifies what's on the tracks thinks the person on the right track is actually a cat... this isn't good."]
+                                                   "Oh no, looks like, the AI that identifies what's on the tracks thinks the person on the right track is actually a cat... this isn't good."]
         self._end_AI_turn_dialogue: List[List[str]] = [["Oh no... Oh no no no! That's not going to look good. See you tomorrow, I gotta make some calls.", "Okay, that was good! See you tomorrow."],
                                                        ["Nice work, see you tomorrow.", "Again? Look down at that screen and let me know why the AI is doing what it just did... Let me call corporate, you should probably go home for today"],
                                                        ["That went better than expected... I think... don't you think?", "Darn... I guess bugs like that just happen sometimes, nothing we can do."]]
@@ -135,9 +135,9 @@ class AssetManager:
             (Entity.HUMAN, 45, Entity.HUMAN, 80, TrackDirection.RIGHT),
             (Entity.HUMAN, 32, Entity.HUMAN, 68, TrackDirection.RIGHT),
 
-            (Entity.HUMAN, 50, Entity.HUMAN, 72, TrackDirection.LEFT),
-            (Entity.HUMAN, 40, Entity.HUMAN, 85, TrackDirection.LEFT),
-            (Entity.HUMAN, 38, Entity.HUMAN, 66, TrackDirection.LEFT),
+            (Entity.HUMAN, 72, Entity.HUMAN, 50, TrackDirection.LEFT),
+            (Entity.HUMAN, 85, Entity.HUMAN, 40, TrackDirection.LEFT),
+            (Entity.HUMAN, 66, Entity.HUMAN, 36, TrackDirection.LEFT),
 
             # (Entity.HUMAN, 36, Entity.HUMAN, 44, TrackDirection.RIGHT),
             # (Entity.HUMAN, 70, Entity.HUMAN, 75, TrackDirection.LEFT),
@@ -153,9 +153,9 @@ class AssetManager:
             (Entity.HUMAN, 80, Entity.HUMAN, 45, TrackDirection.RIGHT),
             (Entity.HUMAN, 68, Entity.HUMAN, 32, TrackDirection.RIGHT),
 
-            (Entity.HUMAN, 72, Entity.HUMAN, 50, TrackDirection.LEFT),
-            (Entity.HUMAN, 85, Entity.HUMAN, 40, TrackDirection.LEFT),
-            (Entity.HUMAN, 66, Entity.HUMAN, 38, TrackDirection.LEFT),
+            (Entity.HUMAN, 50, Entity.HUMAN, 72, TrackDirection.LEFT),
+            (Entity.HUMAN, 40, Entity.HUMAN, 88, TrackDirection.LEFT),
+            (Entity.HUMAN, 38, Entity.HUMAN, 65, TrackDirection.LEFT),
 
             # (Entity.HUMAN, 34, Entity.HUMAN, 44, TrackDirection.RIGHT),
             # (Entity.HUMAN, 72, Entity.HUMAN, 78, TrackDirection.LEFT),
@@ -177,7 +177,16 @@ class AssetManager:
              {"X": X_tensor_scenario_2_doctor_pref, "y": y_tensor_scenario_2_doctor_pref}],
         ]
         # _inference_data[iteration][track_index] => "X": Tensor
-        self._inference_data: List[List[torch.Tensor]] = [[]]
+        self._inference_data: List[List[torch.Tensor]] = [
+            [torch.tensor([[Entity.CAT.value, 3, Entity.HORSE.value, 7]], dtype=torch.float)],
+            [torch.tensor([[Entity.HUMAN.value, 10, Entity.CAT.value, 2]], dtype=torch.float)],
+            [torch.tensor([[Entity.HUMAN.value, 45, Entity.HUMAN.value, 75]], dtype=torch.float)]
+        ]
+        self._ai_turn_inference_data: List[List[torch.Tensor]] = [
+            [torch.tensor([[Entity.HUMAN.value, 10, Entity.CAT.value, 2]], dtype=torch.float)],
+            [torch.tensor([[Entity.HORSE.value, 7,  Entity.HUMAN.value, 89]], dtype=torch.float)],
+            [torch.tensor([[Entity.HUMAN.value, 45, Entity.CAT.value, 1]], dtype=torch.float)]
+        ]
 
     def get_image(self, state_current_iteration: int) -> ImageTuple:
         return self._images[state_current_iteration]
@@ -203,3 +212,6 @@ class AssetManager:
 
     def get_inference_data(self, track_direction: TrackDirection, state_current_iteration: int) -> torch.Tensor:
         return self._inference_data[state_current_iteration][track_direction.value]
+
+    def get_ai_turn_inference_data(self, track_direction: TrackDirection, state_current_iteration: int) -> torch.Tensor:
+        return self._ai_turn_inference_data[state_current_iteration][track_direction.value]
