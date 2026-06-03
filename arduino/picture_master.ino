@@ -75,12 +75,18 @@ LCDWIKI_TOUCH right_touch(RIGHT_TOUCH_CS, TOUCH_CLK, TOUCH_DO, TOUCH_DIN, RIGHT_
 #define YELLOW  0xFFE0
 #define WHITE   0xFFFF
 
+// Blood-splat overlay colors.
+static const uint16_t BLOOD_DARK = 0x2800;
+static const uint16_t BLOOD_MAIN = 0x7800;
+static const uint16_t BLOOD_BRIGHT = 0xB000;
+static const uint16_t BLOOD_BLACKISH = 0x1000;
+
 // SD card wiring:
 // MOSI=D11, MISO=D12, SCK=D13, CS=D6
 const uint8_t SD_CS_PIN = 6;
 
 // Timeout waiting for ACK from the line robot after forwarding a command (milliseconds)
-const unsigned long LINE_ACK_TIMEOUT = 65000;
+const unsigned long LINE_ACK_TIMEOUT = 25000;
 
 bool sdReady = false;
 bool selectionPending = false;
@@ -115,8 +121,15 @@ static uint32_t read32(File &f)
   return result;
 }
 
-static const char *const IMAGE_EXTENSIONS[] = { ".RGB565", ".565", ".RAW", ".BIN", ".BMP" };
+static const char *const IMAGE_EXTENSIONS[] = { ".RAW565", ".RGB565", ".565", ".RAW", ".BIN", ".BMP" };
 static const uint8_t IMAGE_EXTENSION_COUNT = sizeof(IMAGE_EXTENSIONS) / sizeof(IMAGE_EXTENSIONS[0]);
+
+// Return an estimate of free SRAM on AVR (Mega2560). Useful to size temporary buffers.
+int freeRam() {
+  extern int __heap_start, *__brkval;
+  int v;
+  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
+}
 
 // Check whether an image file with ID `imgNum` exists on the SD card in any supported format.
 // Accepts numeric IDs 1..9999 and looks for extensions defined in `IMAGE_EXTENSIONS`.
@@ -152,26 +165,49 @@ static bool drawRaw565File(LCDWIKI_SPI &lcd, File &imageFile)
     return false;
   }
 
-  uint16_t *rowBuf = (uint16_t *)malloc((size_t)displayW * sizeof(uint16_t));
-  if (!rowBuf) {
+  // Push full blocks of pixels instead of individual pixels.
+  // The chunk size is based on available SRAM with a safety margin.
+  int ramBudget = freeRam() - 1024;
+  if (ramBudget < 1024) {
+    ramBudget = 1024;
+  }
+
+  uint32_t maxPixelsByRam = (uint32_t)ramBudget / 2UL;
+  uint32_t maxPixelsInImage = (uint32_t)displayW * displayH;
+  uint32_t pixelsPerChunk32 = (maxPixelsByRam < maxPixelsInImage) ? maxPixelsByRam : maxPixelsInImage;
+  if (pixelsPerChunk32 < displayW) {
+    pixelsPerChunk32 = displayW;
+  }
+  pixelsPerChunk32 -= (pixelsPerChunk32 % displayW);
+  if (pixelsPerChunk32 == 0) {
+    pixelsPerChunk32 = displayW;
+  }
+  uint16_t pixelsPerChunk = (uint16_t)pixelsPerChunk32;
+
+  uint16_t *chunkBuf = (uint16_t *)malloc((size_t)pixelsPerChunk * sizeof(uint16_t));
+  if (!chunkBuf) {
     return false;
   }
 
-  lcd.Fill_Screen(0x0000);
+  lcd.Fill_Screen(BLACK);
+  lcd.Set_Addr_Window(0, 0, displayW - 1, displayH - 1);
 
-  for (uint16_t row = 0; row < displayH; row++) {
-    const int bytesNeeded = (int)displayW * 2;
-    if (imageFile.read((uint8_t *)rowBuf, bytesNeeded) != bytesNeeded) {
-      free(rowBuf);
+  bool firstChunk = true;
+  uint32_t pixelsRemaining = (uint32_t)displayW * displayH;
+  while (pixelsRemaining > 0) {
+    uint16_t chunkPixels = (pixelsRemaining < pixelsPerChunk) ? (uint16_t)pixelsRemaining : pixelsPerChunk;
+    uint32_t bytesNeeded = (uint32_t)chunkPixels * 2UL;
+    if (imageFile.read((uint8_t *)chunkBuf, bytesNeeded) != (int)bytesNeeded) {
+      free(chunkBuf);
       return false;
     }
 
-    for (uint16_t x = 0; x < displayW; x++) {
-      lcd.Draw_Pixe(x, row, rowBuf[x]);
-    }
+    lcd.Push_Any_Color(chunkBuf, chunkPixels, firstChunk, 0);
+    firstChunk = false;
+    pixelsRemaining -= chunkPixels;
   }
 
-  free(rowBuf);
+  free(chunkBuf);
   return true;
 }
 
@@ -218,44 +254,49 @@ static bool drawBmpFile(LCDWIKI_SPI &lcd, File &bmpFile)
   }
 
   lcd.Fill_Screen(BLACK);
+  lcd.Set_Addr_Window(0, 0, bmpWidth - 1, bmpHeight - 1);
 
   uint32_t rowSize = (bmpWidth * 3 + 3) & ~3;
-  uint8_t sdbuffer[12];
 
+  // Read one whole row at a time, convert it to RGB565 in SRAM, and push the row as a block.
+  size_t srcBytes = (size_t)rowSize;
+  size_t dstPixels = (size_t)bmpWidth;
+  uint8_t *srcRow = (uint8_t *)malloc(srcBytes);
+  uint16_t *dstRow = (uint16_t *)malloc(dstPixels * sizeof(uint16_t));
+  if (!srcRow || !dstRow) {
+    if (srcRow) free(srcRow);
+    if (dstRow) free(dstRow);
+    return false;
+  }
+
+  bool firstChunk = true;
   for (int32_t row = 0; row < bmpHeight; row++)
   {
     uint32_t pos = bmpImageOffset + (flip ? (bmpHeight - 1 - row) : row) * rowSize;
     bmpFile.seek(pos);
 
-    int32_t remaining = bmpWidth;
-    int16_t x = 0;
-
-    while (remaining > 0)
+    if (bmpFile.read(srcRow, srcBytes) != (int)srcBytes)
     {
-      uint8_t bytesToRead = sizeof(sdbuffer);
-      uint32_t bytesNeeded = (uint32_t)remaining * 3;
-      if (bytesToRead > bytesNeeded)
-      {
-        bytesToRead = bytesNeeded;
-      }
-
-      uint8_t actuallyRead = bmpFile.read(sdbuffer, bytesToRead);
-      if (actuallyRead == 0)
-      {
-        return false;
-      }
-
-      for (uint8_t i = 0; i + 2 < actuallyRead; i += 3)
-      {
-        uint8_t b = sdbuffer[i];
-        uint8_t g = sdbuffer[i + 1];
-        uint8_t r = sdbuffer[i + 2];
-        lcd.Draw_Pixe(x++, row, lcd.Color_To_565(r, g, b));
-        remaining--;
-      }
+      free(srcRow);
+      free(dstRow);
+      return false;
     }
+
+    for (int32_t x = 0; x < bmpWidth; x++)
+    {
+      uint32_t idx = (uint32_t)x * 3UL;
+      uint8_t b = srcRow[idx];
+      uint8_t g = srcRow[idx + 1];
+      uint8_t r = srcRow[idx + 2];
+      dstRow[x] = lcd.Color_To_565(r, g, b);
+    }
+
+    lcd.Push_Any_Color(dstRow, bmpWidth, firstChunk, 0);
+    firstChunk = false;
   }
 
+  free(srcRow);
+  free(dstRow);
   return true;
 }
 
@@ -270,7 +311,7 @@ static bool bmpDraw(LCDWIKI_SPI &lcd, int imgNum)
   }
 
   char filename[16];
-  const char *const rawExtensions[] = { ".RGB565", ".565", ".RAW", ".BIN" };
+  const char *const rawExtensions[] = { ".RAW565", ".RGB565", ".565", ".RAW", ".BIN" };
   for (uint8_t i = 0; i < sizeof(rawExtensions) / sizeof(rawExtensions[0]); i++)
   {
     sprintf(filename, "%04d%s", imgNum, rawExtensions[i]);
@@ -340,6 +381,87 @@ static void sendSelectionDecision(const char *side)
   selectionPending = false;
 }
 
+static void drawFilledCircle(LCDWIKI_SPI &lcd, int16_t cx, int16_t cy, int16_t radius, uint16_t color)
+{
+  int16_t r2 = radius * radius;
+  for (int16_t y = -radius; y <= radius; ++y) {
+    for (int16_t x = -radius; x <= radius; ++x) {
+      if ((x * x) + (y * y) <= r2) {
+        lcd.Draw_Pixe(cx + x, cy + y, color);
+      }
+    }
+  }
+}
+
+static void drawBloodSplatAt(LCDWIKI_SPI &lcd, int16_t cx, int16_t cy, uint8_t variant)
+{
+  int8_t dripX = 0;
+  int8_t dripY = 1;
+  if (variant == 1) {
+    dripX = -1;
+    dripY = 1;
+  } else if (variant == 2) {
+    dripX = 1;
+    dripY = 0;
+  } else if (variant == 3) {
+    dripX = -1;
+    dripY = 0;
+  }
+
+  int16_t leftSpike = (variant & 1) ? 36 : 42;
+  int16_t rightSpike = (variant & 2) ? 34 : 28;
+  int16_t upperSpike = (variant == 2) ? 18 : 26;
+  int16_t lowerSpike = (variant == 3) ? 50 : 46;
+
+  // Main splat body.
+  drawFilledCircle(lcd, cx - 24, cy + 6, 22, BLOOD_DARK);
+  drawFilledCircle(lcd, cx - 5, cy - 4, 28, BLOOD_MAIN);
+  drawFilledCircle(lcd, cx + 22, cy + 10, 18, BLOOD_DARK);
+  drawFilledCircle(lcd, cx + 4, cy + 26, 24, BLOOD_MAIN);
+  drawFilledCircle(lcd, cx - 12, cy + 20, 12, BLOOD_BRIGHT);
+
+  // Irregular splashes around the center.
+  drawFilledCircle(lcd, cx - leftSpike, cy - 10, 7, BLOOD_MAIN);
+  drawFilledCircle(lcd, cx - 34, cy + 30, 6, BLOOD_DARK);
+  drawFilledCircle(lcd, cx - 12, cy - 28, 5, BLOOD_BRIGHT);
+  drawFilledCircle(lcd, cx + rightSpike, cy - upperSpike, 8, BLOOD_MAIN);
+  drawFilledCircle(lcd, cx + 42, cy + 18, 6, BLOOD_DARK);
+  drawFilledCircle(lcd, cx + 14, cy + lowerSpike, 5, BLOOD_BRIGHT);
+
+  // Drips downward.
+  for (int16_t i = -10; i <= 10; ++i) {
+    lcd.Draw_Pixe(cx + i, cy + 36, BLOOD_MAIN);
+  }
+  for (int16_t y = 0; y < 28; ++y) {
+    lcd.Draw_Pixe(cx - 15 + (dripX * (y / 8)), cy + 38 + (dripY * y), BLOOD_DARK);
+    if (y < 20) lcd.Draw_Pixe(cx + 16 - (dripX * (y / 10)), cy + 40 + y, BLOOD_DARK);
+    if (y < 16) lcd.Draw_Pixe(cx + 2 + (dripX * 3), cy + 44 + y, BLOOD_BLACKISH);
+  }
+}
+
+static void drawBloodOverlay(LCDWIKI_SPI &lcd)
+{
+  const int16_t w = lcd.Get_Display_Width();
+  const int16_t h = lcd.Get_Display_Height();
+
+  const int16_t marginX = 42;
+  const int16_t marginY = 54;
+
+  int16_t x1 = random(marginX, (w / 2) - marginX);
+  int16_t y1 = random(marginY, (h / 2) - marginY);
+  int16_t x2 = random((w / 2) + marginX, w - marginX);
+  int16_t y2 = random(marginY, (h / 2) - marginY);
+  int16_t x3 = random(marginX, (w / 2) - marginX);
+  int16_t y3 = random((h / 2) + marginY, h - marginY);
+  int16_t x4 = random((w / 2) + marginX, w - marginX);
+  int16_t y4 = random((h / 2) + marginY, h - marginY);
+
+  drawBloodSplatAt(lcd, x1, y1, (uint8_t)random(0, 4));
+  drawBloodSplatAt(lcd, x2, y2, (uint8_t)random(0, 4));
+  drawBloodSplatAt(lcd, x3, y3, (uint8_t)random(0, 4));
+  drawBloodSplatAt(lcd, x4, y4, (uint8_t)random(0, 4));
+}
+
 // Poll both touch controllers when a selection is armed. Debounces with a short delay
 // after a selection to avoid duplicate events.
 static void pollTouchSelection()
@@ -350,6 +472,7 @@ static void pollTouchSelection()
 
   left_touch.TP_Scan(0);
   if (left_touch.TP_Get_State() & TP_PRES_DOWN) {
+    drawBloodOverlay(my_lcd1);
     sendSelectionDecision("LEFT");
     delay(150);
     return;
@@ -357,6 +480,7 @@ static void pollTouchSelection()
 
   right_touch.TP_Scan(0);
   if (right_touch.TP_Get_State() & TP_PRES_DOWN) {
+    drawBloodOverlay(my_lcd2);
     sendSelectionDecision("RIGHT");
     delay(150);
   }
@@ -420,9 +544,9 @@ static void handleUsbCommand(String cmd)
     sprintf(
       ack,
       "ACK;FROM;PIC;STATE;DONE;A;%d;%s;B;%d;%s",
-      a, // integer
+      a,
       aOk ? "OK" : "MISS",
-      b, // integer
+      b,
       bOk ? "OK" : "MISS"
     );
     Serial.println(ack);
@@ -499,6 +623,7 @@ void setup()
 {
   Serial.begin(115200);
   Serial1.begin(38400);
+  randomSeed((unsigned long)micros() ^ (unsigned long)analogRead(A15));
 
   pinMode(TFT1_CS, OUTPUT);
   pinMode(TFT2_CS, OUTPUT);
@@ -553,6 +678,9 @@ void setup()
     my_lcd1.Print_String((uint8_t*)"SD FAIL", 20, 50);
     my_lcd1.Set_Text_colour(WHITE);
   }
+  // Report free SRAM so you can tune buffer sizes (Mega2560 has ~8 KiB SRAM)
+  Serial.print(F("Free RAM: "));
+  Serial.println(freeRam());
 }
 
 void loop()
