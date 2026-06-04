@@ -8,7 +8,7 @@ bun --version
 ```
 bun run watch
 ```
-4. Then serve index.html, you can do this using python e.g.
+4. Then serve index.html, you can do this using python (see https://www.python.org/downloads/) e.g.
 ```
 python -m http.server 8000
 ```
