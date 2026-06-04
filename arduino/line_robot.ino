@@ -1,4 +1,4 @@
-5#include <SoftwareSerial.h>
+#include <SoftwareSerial.h>
 #include "config.h"
 
 // Line robot: autonomous follower with remote LEFT/RIGHT/STOP branch control.
