@@ -9,7 +9,7 @@ import {NetworkType} from "../network-structure/network-type.ts";
 export type CallbackMethod = () => void;
 
 export class NeuralNetworkClient extends Client {
-    public readonly trolleyProblemModel: Structure;
+    public trolleyProblemModel: Structure;
 
     // callbacks for things that want to be updated when the model is updated via a notification message from the server
     private modelUpdateCallbacks: (CallbackMethod)[] = [];
@@ -70,6 +70,8 @@ export class NeuralNetworkClient extends Client {
                 console.log(structure["layer_1.weight"], structure["layer_1.bias"]);
                 console.log(structure["layer_2.weight"], structure["layer_2.bias"]);
                 console.log(structure["layer_3.weight"], structure["layer_3.bias"]);
+
+                // this.trolleyProblemModel = new Structure();
 
                 this.trolleyProblemModel.initialize([[structure["layer_1.weight"], structure["layer_1.bias"]],
                                                      [structure["layer_2.weight"], structure["layer_2.bias"]],

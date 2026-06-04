@@ -17,20 +17,20 @@ class ImageTuple:
 class AssetManager:
     def __init__(self):
         self._images: List[ImageTuple] = \
-            [ImageTuple(15, "cat", 19, "horse"),
-            ImageTuple(15, "young guy", 23, "cat"),
-             ImageTuple(15, "doctor", 23, "older guy")]
+            [ImageTuple(21, "cat", 24, "horse"),
+            ImageTuple(12, "young guy", 21, "cat"),
+             ImageTuple(14, "doctor", 17, "older guy")]
         self._images_AI_turn: List[ImageTuple] = \
-            [ImageTuple(15, "young human", 23, "cat"),
-             ImageTuple(15, "horse", 23, "older human"),
-             ImageTuple(15, "disabled person", 23, "young girl")] # TOD
-        self._user_input_dialogue: List[str] = ["Okay so on your screens you'll see whats on the left and right track, just tap the screen of whatever you want to run over. Simple, right?",
-                                                "So... that was not great for your first day... Let's see if we can fix this, tap the screen of what... or who... who you want to run over, okay and quickly?",
+            [ImageTuple(12, "young human", 21, "cat"),
+             ImageTuple(24, "horse", 17, "older human"),
+             ImageTuple(19, "disabled person", 16, "young girl")] # TOD
+        self._user_input_dialogue: List[str] = ["Okay... so on your screens you'll see whats on the left and right track, just tap the screen of whatever you want to run over. Simple, right?",
+                                                "So... that was not great for your first day... Let's see if we can fix this, tap the screen of what... or who... you want to run over, okay and... chop chop?",
                                                 "Okay well let's see what happens today, you know the drill, tap the screen of whatever you want to run over."]
         self._end_dialogue: List[List[str]] = [["So I guess you're a cat person then? I think you and me are going to be goood friends.", "So I guess you're not a cat person then? I think you and me are going to be goood friends."],
                                                ["Didn't you get the memo? We're all going to lose our jobs because you're a homocidal maniac!", "Okay good job that should stop accidents like yesterday's from ever happening again"],
                                                ["Oh well, don't beat yourself up at the end of the day, the AI must make a decision.", "Tough decision, but that's why they pay you the big bucks."]]
-        self._start_AI_turn_dialogue: List[str] = ["Okay so corporate wants a prototype ASAP, so I think that's enough trained for today. Let's see how it goes on it's own",
+        self._start_AI_turn_dialogue: List[str] = ["Okay so corporate wants a prototype ASAP, so I think that's enough training for today. Let's see how it goes on it's own",
                                                    "Let's test the AI out again, everything looks good and we need to ship this model yesterday!",
                                                    "Oh no, looks like, the AI that identifies what's on the tracks thinks the person on the right track is actually a cat... this isn't good."]
         self._end_AI_turn_dialogue: List[List[str]] = [["Oh no... Oh no no no! That's not going to look good. See you tomorrow, I gotta make some calls.", "Okay, that was good! See you tomorrow."],
@@ -199,11 +199,11 @@ class AssetManager:
         if state_current_state == States.USER_INPUT:
             return self._user_input_dialogue[state_current_iteration]
         elif state_current_state == States.END:
-            return self._end_dialogue[state_current_iteration]
+            return self._end_dialogue[state_current_iteration] # List[str]
         elif state_current_state == States.START_AI_TURN:
             return self._start_AI_turn_dialogue[state_current_iteration]
         elif state_current_state == States.END_AI_TURN:
-            return self._end_AI_turn_dialogue[state_current_iteration]
+            return self._end_AI_turn_dialogue[state_current_iteration] # List[str]
 
         raise ValueError("invalid state")
 
@@ -211,7 +211,7 @@ class AssetManager:
         return self._training_data[state_current_iteration][track_direction.value]
 
     def get_inference_data(self, track_direction: TrackDirection, state_current_iteration: int) -> torch.Tensor:
-        return self._inference_data[state_current_iteration][track_direction.value]
+        return self._inference_data[state_current_iteration][0]
 
     def get_ai_turn_inference_data(self, track_direction: TrackDirection, state_current_iteration: int) -> torch.Tensor:
-        return self._ai_turn_inference_data[state_current_iteration][track_direction.value]
+        return self._ai_turn_inference_data[state_current_iteration][0]

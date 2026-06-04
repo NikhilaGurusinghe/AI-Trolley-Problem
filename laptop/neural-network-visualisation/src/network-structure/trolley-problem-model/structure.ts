@@ -29,7 +29,7 @@ export function convertToTrolleyProblemModelStructure(structureJSON: any): Troll
 
 export default class Structure {
 
-    private readonly layers: Layer[];
+    private layers: Layer[];
 
     public constructor(allWeightsAndBiases?: [WeightsArray, BiasesArray][]) {
         this.layers = [];
@@ -40,6 +40,8 @@ export default class Structure {
     }
 
     public initialize(allWeightsAndBiases: [WeightsArray, BiasesArray][]): void {
+       this.layers = [];
+
         for (let layerIndex: number = 0; layerIndex < allWeightsAndBiases.length; layerIndex++) {
             const [weights, biases]: [WeightsArray, BiasesArray] = allWeightsAndBiases[layerIndex] as [number[][], number[]];
 
